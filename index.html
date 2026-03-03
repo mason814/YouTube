@@ -3,348 +3,170 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>YourFeed — No Algorithm</title>
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>YourFeed</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0a;
-    --surface: #111111;
-    --surface2: #1a1a1a;
-    --border: #222222;
+    --bg: #0c0c0c;
+    --card: #161616;
+    --border: #242424;
     --accent: #ff4400;
-    --accent2: #ffaa00;
     --text: #f0f0f0;
     --muted: #666;
+    --muted2: #444;
     --success: #00cc66;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
 
-- { box-sizing: border-box; margin: 0; padding: 0; }
+- { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 
 body {
 background: var(–bg);
 color: var(–text);
 font-family: ‘DM Sans’, sans-serif;
 min-height: 100vh;
-font-size: 15px;
+overscroll-behavior: none;
 }
 
-/* HEADER */
-header {
+/* ── HEADER ── */
+.header {
+position: sticky;
+top: 0;
+z-index: 50;
+background: rgba(12,12,12,0.97);
+backdrop-filter: blur(16px);
+-webkit-backdrop-filter: blur(16px);
+border-bottom: 1px solid var(–border);
+padding-top: var(–safe-top);
+}
+
+.header-inner {
+padding: 14px 16px 12px;
+}
+
+.header-top {
 display: flex;
 align-items: center;
 justify-content: space-between;
-padding: 20px 32px;
-border-bottom: 1px solid var(–border);
-position: sticky;
-top: 0;
-background: rgba(10,10,10,0.95);
-backdrop-filter: blur(12px);
-z-index: 100;
+margin-bottom: 12px;
 }
 
 .logo {
 font-family: ‘Syne’, sans-serif;
 font-weight: 800;
-font-size: 22px;
+font-size: 20px;
 letter-spacing: -0.5px;
 }
 .logo span { color: var(–accent); }
 
-.tagline {
-font-size: 12px;
-color: var(–muted);
-letter-spacing: 0.05em;
-text-transform: uppercase;
-}
-
-.header-right {
+.header-actions {
 display: flex;
-gap: 12px;
+gap: 8px;
 align-items: center;
 }
 
-/* BUTTONS */
-button {
+.refresh-btn {
+background: var(–card);
+border: 1px solid var(–border);
+color: var(–muted);
+width: 34px;
+height: 34px;
+border-radius: 50%;
+display: flex;
+align-items: center;
+justify-content: center;
 cursor: pointer;
-font-family: ‘DM Sans’, sans-serif;
-border: none;
-outline: none;
 transition: all 0.15s;
 }
+.refresh-btn:active { transform: scale(0.92); }
+.refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
 
-.btn-primary {
-background: var(–accent);
-color: white;
-font-weight: 600;
-font-size: 13px;
-padding: 8px 18px;
-border-radius: 6px;
-letter-spacing: 0.02em;
-}
-.btn-primary:hover { background: #ff5511; transform: translateY(-1px); }
-
-.btn-ghost {
-background: transparent;
-color: var(–muted);
-font-size: 13px;
-padding: 8px 14px;
-border-radius: 6px;
+.manage-btn {
+background: var(–card);
 border: 1px solid var(–border);
-}
-.btn-ghost:hover { color: var(–text); border-color: #444; }
-
-/* LAYOUT */
-.app {
-display: grid;
-grid-template-columns: 280px 1fr;
-min-height: calc(100vh - 65px);
-}
-
-/* SIDEBAR */
-.sidebar {
-border-right: 1px solid var(–border);
-padding: 24px 20px;
-display: flex;
-flex-direction: column;
-gap: 20px;
-position: sticky;
-top: 65px;
-height: calc(100vh - 65px);
-overflow-y: auto;
-}
-
-.sidebar-title {
-font-family: ‘Syne’, sans-serif;
-font-size: 11px;
-font-weight: 700;
 color: var(–muted);
-letter-spacing: 0.12em;
-text-transform: uppercase;
+height: 34px;
+padding: 0 14px;
+border-radius: 20px;
+font-size: 13px;
+font-family: ‘DM Sans’, sans-serif;
+cursor: pointer;
+transition: all 0.15s;
 }
+.manage-btn:active { transform: scale(0.95); }
 
-.add-channel {
+/* ADD CHANNEL BAR */
+.add-bar {
 display: flex;
-flex-direction: column;
 gap: 8px;
 }
 
-.add-channel input {
-background: var(–surface2);
-border: 1px solid var(–border);
-border-radius: 8px;
-color: var(–text);
-font-family: ‘DM Sans’, sans-serif;
-font-size: 13px;
-padding: 10px 12px;
-width: 100%;
-transition: border-color 0.15s;
-}
-.add-channel input:focus { outline: none; border-color: var(–accent); }
-.add-channel input::placeholder { color: var(–muted); }
-
-.add-channel .hint {
-font-size: 11px;
-color: var(–muted);
-line-height: 1.5;
-}
-.add-channel .hint a { color: var(–accent2); text-decoration: none; }
-
-/* CHANNEL LIST */
-.channel-list {
-display: flex;
-flex-direction: column;
-gap: 4px;
-}
-
-.channel-item {
-display: flex;
-align-items: center;
-gap: 10px;
-padding: 10px 10px;
-border-radius: 8px;
-cursor: pointer;
-border: 1px solid transparent;
-transition: all 0.15s;
-position: relative;
-}
-.channel-item:hover { background: var(–surface2); }
-.channel-item.active { background: var(–surface2); border-color: var(–border); }
-
-.channel-avatar {
-width: 32px;
-height: 32px;
-border-radius: 50%;
-background: var(–surface2);
-display: flex;
-align-items: center;
-justify-content: center;
-font-family: ‘Syne’, sans-serif;
-font-weight: 700;
-font-size: 12px;
-color: var(–accent);
-flex-shrink: 0;
-overflow: hidden;
-border: 1px solid var(–border);
-}
-.channel-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.channel-name {
+.add-bar input {
 flex: 1;
-font-size: 13px;
-font-weight: 500;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
-
-.channel-remove {
-background: transparent;
-color: transparent;
-font-size: 16px;
-width: 22px;
-height: 22px;
-border-radius: 4px;
-display: flex;
-align-items: center;
-justify-content: center;
-transition: all 0.1s;
-}
-.channel-item:hover .channel-remove { color: var(–muted); }
-.channel-remove:hover { background: #2a1010 !important; color: #ff4444 !important; }
-
-.all-channels {
-display: flex;
-align-items: center;
-gap: 10px;
-padding: 10px;
-border-radius: 8px;
-cursor: pointer;
-border: 1px solid transparent;
-font-size: 13px;
-font-weight: 500;
-transition: all 0.15s;
-margin-bottom: 4px;
-}
-.all-channels:hover, .all-channels.active { background: var(–surface2); border-color: var(–border); }
-
-.all-icon {
-width: 32px;
-height: 32px;
-border-radius: 50%;
-background: linear-gradient(135deg, var(–accent), var(–accent2));
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 14px;
-flex-shrink: 0;
-}
-
-/* MAIN */
-main {
-padding: 28px 36px;
-max-width: 1200px;
-}
-
-.feed-header {
-display: flex;
-align-items: baseline;
-justify-content: space-between;
-margin-bottom: 28px;
-}
-
-.feed-title {
-font-family: ‘Syne’, sans-serif;
-font-weight: 800;
-font-size: 28px;
-letter-spacing: -0.5px;
-}
-
-.feed-count {
-font-size: 13px;
-color: var(–muted);
-}
-
-/* VIDEO GRID */
-.video-grid {
-display: grid;
-grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-gap: 24px;
-}
-
-.video-card {
-background: var(–surface);
+background: var(–card);
 border: 1px solid var(–border);
 border-radius: 12px;
-overflow: hidden;
-cursor: pointer;
-transition: transform 0.2s, border-color 0.2s;
-text-decoration: none;
-color: inherit;
-display: block;
+color: var(–text);
+font-family: ‘DM Sans’, sans-serif;
+font-size: 14px;
+padding: 10px 14px;
+transition: border-color 0.15s;
+min-width: 0;
 }
-.video-card:hover { transform: translateY(-3px); border-color: #333; }
+.add-bar input:focus { outline: none; border-color: var(–accent); }
+.add-bar input::placeholder { color: var(–muted2); }
 
-.thumbnail {
-width: 100%;
-aspect-ratio: 16/9;
-background: var(–surface2);
-position: relative;
-overflow: hidden;
-}
-.thumbnail img {
-width: 100%;
-height: 100%;
-object-fit: cover;
-transition: transform 0.3s;
-}
-.video-card:hover .thumbnail img { transform: scale(1.03); }
-
-.duration {
-position: absolute;
-bottom: 8px;
-right: 8px;
-background: rgba(0,0,0,0.85);
-color: white;
-font-size: 11px;
-font-weight: 600;
-padding: 2px 6px;
-border-radius: 4px;
-font-family: ‘Syne’, sans-serif;
-}
-
-.new-badge {
-position: absolute;
-top: 8px;
-left: 8px;
+.add-btn {
 background: var(–accent);
 color: white;
-font-size: 10px;
-font-weight: 700;
-padding: 2px 7px;
-border-radius: 4px;
-letter-spacing: 0.05em;
-text-transform: uppercase;
 font-family: ‘Syne’, sans-serif;
+font-weight: 700;
+font-size: 13px;
+padding: 0 16px;
+border-radius: 12px;
+border: none;
+cursor: pointer;
+white-space: nowrap;
+transition: all 0.15s;
+flex-shrink: 0;
 }
+.add-btn:active { transform: scale(0.95); opacity: 0.9; }
 
-.card-body {
-padding: 14px 16px 16px;
+/* CHANNEL CHIPS */
+.channel-chips {
+display: flex;
+gap: 8px;
+overflow-x: auto;
+padding: 10px 16px 12px;
+scrollbar-width: none;
+-webkit-overflow-scrolling: touch;
 }
+.channel-chips::-webkit-scrollbar { display: none; }
 
-.card-channel {
+.chip {
 display: flex;
 align-items: center;
-gap: 8px;
-margin-bottom: 8px;
-}
-
-.card-avatar {
-width: 22px;
-height: 22px;
-border-radius: 50%;
-background: var(–surface2);
+gap: 6px;
+background: var(–card);
 border: 1px solid var(–border);
+border-radius: 20px;
+padding: 5px 12px 5px 8px;
+font-size: 13px;
+white-space: nowrap;
+cursor: pointer;
+transition: all 0.15s;
+flex-shrink: 0;
+}
+.chip.active { border-color: var(–accent); background: #1a0800; color: var(–accent); }
+.chip:active { transform: scale(0.95); }
+
+.chip-avatar {
+width: 20px;
+height: 20px;
+border-radius: 50%;
+background: #222;
 overflow: hidden;
 flex-shrink: 0;
 display: flex;
@@ -355,75 +177,138 @@ font-weight: 700;
 font-family: ‘Syne’, sans-serif;
 color: var(–accent);
 }
+.chip-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.chip-all { background: var(–accent); border-color: var(–accent); color: white; }
+.chip-all.active { background: var(–accent); }
+
+/* FEED */
+.feed {
+padding: 12px 12px calc(20px + var(–safe-bottom));
+display: flex;
+flex-direction: column;
+gap: 12px;
+}
+
+/* VIDEO CARD */
+.video-card {
+background: var(–card);
+border: 1px solid var(–border);
+border-radius: 16px;
+overflow: hidden;
+text-decoration: none;
+color: inherit;
+display: block;
+transition: transform 0.15s;
+animation: fadeUp 0.3s ease both;
+}
+.video-card:active { transform: scale(0.98); }
+
+@keyframes fadeUp {
+from { opacity: 0; transform: translateY(8px); }
+to { opacity: 1; transform: translateY(0); }
+}
+
+.thumbnail {
+width: 100%;
+aspect-ratio: 16/9;
+background: #1a1a1a;
+position: relative;
+overflow: hidden;
+}
+.thumbnail img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
+
+.new-badge {
+position: absolute;
+top: 10px;
+left: 10px;
+background: var(–accent);
+color: white;
+font-size: 10px;
+font-weight: 700;
+font-family: ‘Syne’, sans-serif;
+padding: 3px 8px;
+border-radius: 6px;
+letter-spacing: 0.05em;
+}
+
+.card-body {
+padding: 12px 14px 14px;
+}
+
+.card-meta {
+display: flex;
+align-items: center;
+gap: 8px;
+margin-bottom: 7px;
+}
+
+.card-avatar {
+width: 24px;
+height: 24px;
+border-radius: 50%;
+background: #1e1e1e;
+overflow: hidden;
+flex-shrink: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 10px;
+font-weight: 700;
+font-family: ‘Syne’, sans-serif;
+color: var(–accent);
+border: 1px solid var(–border);
+}
 .card-avatar img { width: 100%; height: 100%; object-fit: cover; }
 
-.card-channel-name {
+.card-channel {
 font-size: 12px;
 color: var(–muted);
 font-weight: 500;
-}
-
-.card-title {
-font-size: 14px;
-font-weight: 500;
-line-height: 1.45;
-color: var(–text);
-display: -webkit-box;
--webkit-line-clamp: 2;
--webkit-box-orient: vertical;
+flex: 1;
+white-space: nowrap;
 overflow: hidden;
-margin-bottom: 8px;
+text-overflow: ellipsis;
 }
 
 .card-date {
 font-size: 12px;
-color: var(–muted);
+color: var(–muted2);
+flex-shrink: 0;
 }
 
-/* EMPTY STATE */
-.empty-state {
+.card-title {
+font-size: 15px;
+font-weight: 500;
+line-height: 1.4;
+display: -webkit-box;
+-webkit-line-clamp: 2;
+-webkit-box-orient: vertical;
+overflow: hidden;
+}
+
+/* STATES */
+.empty-state, .loading-state {
 display: flex;
 flex-direction: column;
 align-items: center;
 justify-content: center;
+padding: 60px 30px;
 text-align: center;
-padding: 80px 40px;
-gap: 16px;
+gap: 12px;
 }
 
-.empty-icon {
-font-size: 56px;
-opacity: 0.3;
-}
-
-.empty-title {
-font-family: ‘Syne’, sans-serif;
-font-size: 22px;
-font-weight: 700;
-color: var(–muted);
-}
-
-.empty-body {
-font-size: 14px;
-color: var(–muted);
-max-width: 360px;
-line-height: 1.6;
-opacity: 0.7;
-}
-
-/* LOADING */
-.loading {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-padding: 80px;
-gap: 16px;
-}
+.empty-icon { font-size: 48px; opacity: 0.3; }
+.empty-title { font-family: ‘Syne’, sans-serif; font-size: 18px; font-weight: 700; color: var(–muted); }
+.empty-body { font-size: 14px; color: var(–muted); line-height: 1.6; opacity: 0.7; }
 
 .spinner {
-width: 36px;
-height: 36px;
+width: 32px;
+height: 32px;
 border: 2px solid var(–border);
 border-top-color: var(–accent);
 border-radius: 50%;
@@ -431,471 +316,392 @@ animation: spin 0.7s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-.loading-text {
-font-size: 13px;
-color: var(–muted);
-}
-
-/* ERROR */
-.error-banner {
-background: #1a0800;
-border: 1px solid #331100;
-color: #ff8844;
-font-size: 13px;
-padding: 12px 16px;
-border-radius: 8px;
-margin-bottom: 20px;
-}
-
-/* REFRESH BTN */
-.refresh-btn {
-background: var(–surface2);
-border: 1px solid var(–border);
-color: var(–muted);
-font-size: 13px;
-padding: 6px 14px;
-border-radius: 6px;
-display: flex;
-align-items: center;
-gap: 6px;
-font-family: ‘DM Sans’, sans-serif;
-transition: all 0.15s;
-}
-.refresh-btn:hover { color: var(–text); border-color: #444; }
-.refresh-btn.spinning svg { animation: spin 1s linear infinite; }
-
-svg { display: block; }
-
-/* CORS NOTE */
-.cors-note {
-background: #0d1200;
-border: 1px solid #223300;
-border-radius: 10px;
-padding: 16px 20px;
-font-size: 13px;
-color: #88cc44;
-line-height: 1.6;
-margin-bottom: 24px;
-}
-.cors-note strong { color: #aaee66; }
-
-/* MODAL */
-.modal-overlay {
+/* MANAGE SHEET */
+.sheet-overlay {
 display: none;
 position: fixed;
 inset: 0;
-background: rgba(0,0,0,0.7);
-z-index: 200;
-align-items: center;
-justify-content: center;
+background: rgba(0,0,0,0.6);
+z-index: 100;
+align-items: flex-end;
 }
-.modal-overlay.open { display: flex; }
+.sheet-overlay.open { display: flex; }
 
-.modal {
-background: var(–surface);
-border: 1px solid var(–border);
-border-radius: 16px;
-padding: 32px;
-max-width: 520px;
-width: 90%;
-max-height: 80vh;
+.sheet {
+background: #1a1a1a;
+border-radius: 20px 20px 0 0;
+padding: 20px 16px calc(20px + var(–safe-bottom));
+width: 100%;
+max-height: 70vh;
 overflow-y: auto;
 }
 
-.modal h2 {
+.sheet-handle {
+width: 36px;
+height: 4px;
+background: var(–muted2);
+border-radius: 2px;
+margin: 0 auto 20px;
+}
+
+.sheet-title {
 font-family: ‘Syne’, sans-serif;
 font-weight: 800;
-font-size: 22px;
-margin-bottom: 8px;
+font-size: 18px;
+margin-bottom: 16px;
 }
 
-.modal p {
-color: var(–muted);
-font-size: 14px;
-line-height: 1.6;
-margin-bottom: 20px;
+.sheet-channel {
+display: flex;
+align-items: center;
+gap: 12px;
+padding: 12px 0;
+border-bottom: 1px solid var(–border);
 }
 
-.modal ol {
-color: var(–muted);
-font-size: 13px;
-line-height: 1.8;
-padding-left: 20px;
-margin-bottom: 20px;
-}
-.modal ol li { margin-bottom: 6px; }
-.modal ol strong { color: var(–text); }
-.modal code {
-background: var(–surface2);
-padding: 1px 6px;
-border-radius: 4px;
-font-size: 12px;
-color: var(–accent2);
-}
-
-.modal-close {
-float: right;
-background: transparent;
-color: var(–muted);
-font-size: 22px;
-line-height: 1;
-padding: 4px;
-margin-top: -4px;
-}
-.modal-close:hover { color: var(–text); }
-
-/* STATUS DOT */
-.status-dot {
-width: 7px;
-height: 7px;
+.sheet-avatar {
+width: 36px;
+height: 36px;
 border-radius: 50%;
-background: var(–success);
-display: inline-block;
-margin-right: 5px;
-box-shadow: 0 0 6px var(–success);
+background: #222;
+overflow: hidden;
+flex-shrink: 0;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 13px;
+font-weight: 700;
+font-family: ‘Syne’, sans-serif;
+color: var(–accent);
+}
+.sheet-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.sheet-name {
+flex: 1;
+font-size: 14px;
+font-weight: 500;
 }
 
-/* Scrollbar */
-::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(–border); border-radius: 2px; }
+.remove-btn {
+background: #2a1010;
+border: none;
+color: #ff6644;
+font-size: 12px;
+font-family: ‘DM Sans’, sans-serif;
+padding: 6px 12px;
+border-radius: 8px;
+cursor: pointer;
+}
+
+/* ERROR TOAST */
+.toast {
+position: fixed;
+bottom: calc(20px + var(–safe-bottom));
+left: 50%;
+transform: translateX(-50%) translateY(80px);
+background: #2a1010;
+border: 1px solid #551100;
+color: #ff8844;
+font-size: 13px;
+padding: 10px 18px;
+border-radius: 20px;
+white-space: nowrap;
+z-index: 200;
+transition: transform 0.3s;
+pointer-events: none;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+
+svg { display: block; }
 </style>
 
 </head>
 <body>
 
-<header>
-  <div>
-    <div class="logo">Your<span>Feed</span></div>
-    <div class="tagline"><span class="status-dot"></span>Algorithm-free · Just your channels</div>
-  </div>
-  <div class="header-right">
-    <button class="btn-ghost" onclick="openHelp()">How to find Channel ID</button>
-    <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">
-      <svg id="refreshIcon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-        <path d="M23 4v6h-6M1 20v-6h6"/>
-        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
-      </svg>
-      Refresh
-    </button>
-  </div>
-</header>
-
-<div class="app">
-  <aside class="sidebar">
-    <div class="sidebar-title">Channels</div>
-
-```
-<div class="all-channels active" id="allBtn" onclick="showAll()">
-  <div class="all-icon">▶</div>
-  All Channels
-</div>
-
-<div class="channel-list" id="channelList"></div>
-
-<div class="add-channel">
-  <div class="sidebar-title">Add Channel</div>
-  <input type="text" id="channelIdInput" placeholder="UCxxxxxxxxxxxxxxxxxxxxxx" maxlength="100"/>
-  <input type="text" id="channelNameInput" placeholder="Channel name (optional)" maxlength="60" style="margin-top:4px"/>
-  <button class="btn-primary" onclick="addChannel()">Add Channel</button>
-  <div class="hint">
-    Paste a YouTube Channel ID (starts with UC…).<br>
-    <a href="#" onclick="openHelp(); return false;">Where do I find this?</a>
-  </div>
-</div>
-```
-
-  </aside>
-
-  <main>
-    <div class="cors-note" id="corsNote">
-      <strong>🔒 Browser note:</strong> YouTube RSS feeds are fetched via a CORS proxy (rss2json.com). Your channel list is stored locally in your browser — nothing leaves your device. If a channel fails to load, try refreshing.
+<div class="header">
+  <div class="header-inner">
+    <div class="header-top">
+      <div class="logo">Your<span>Feed</span></div>
+      <div class="header-actions">
+        <button class="manage-btn" onclick="openSheet()">Channels</button>
+        <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">
+          <svg id="refreshIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M23 4v6h-6M1 20v-6h6"/>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+          </svg>
+        </button>
+      </div>
     </div>
-    <div class="feed-header">
-      <div class="feed-title" id="feedTitle">All Channels</div>
-      <div class="feed-count" id="feedCount"></div>
+    <div class="add-bar">
+      <input type="text" id="channelInput" placeholder="Paste Channel ID (UCxxxxxx…)" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <button class="add-btn" onclick="addChannel()">Add</button>
     </div>
-    <div id="errorBanner"></div>
-    <div id="feedContent"></div>
-  </main>
+  </div>
+  <div class="channel-chips" id="chips"></div>
 </div>
 
-<!-- HELP MODAL -->
+<div class="feed" id="feed"></div>
 
-<div class="modal-overlay" id="helpModal">
-  <div class="modal">
-    <button class="modal-close" onclick="closeHelp()">×</button>
-    <h2>Finding a Channel ID</h2>
-    <p>YouTube channel IDs start with <code>UC</code> and are 24 characters long. Here's how to find one:</p>
-    <ol>
-      <li>Go to the YouTube channel you want to add.</li>
-      <li>Look at the URL bar. If it shows <code>/channel/UCxxxxxx</code>, that's the ID — copy everything after <code>/channel/</code>.</li>
-      <li>If the URL shows a custom handle like <code>/@ChannelName</code>, click <strong>About</strong> on the channel page, then <strong>Share</strong> → <strong>Copy channel link</strong>. The link will contain the channel ID.</li>
-      <li>Alternatively, right-click the channel page → <strong>View Page Source</strong> and search for <code>"channelId"</code>.</li>
-    </ol>
-    <p style="margin-bottom:0">The ID will look like: <code>UCVHFbw7woebKtfvug_tMXOQ</code></p>
-    <br>
-    <button class="btn-primary" onclick="closeHelp()">Got it</button>
+<!-- MANAGE SHEET -->
+
+<div class="sheet-overlay" id="sheetOverlay" onclick="handleSheetClick(event)">
+  <div class="sheet" id="sheet">
+    <div class="sheet-handle"></div>
+    <div class="sheet-title">My Channels</div>
+    <div id="sheetList"></div>
   </div>
 </div>
+
+<!-- TOAST -->
+
+<div class="toast" id="toast"></div>
 
 <script>
-// ─── STATE ──────────────────────────────────────────────────────────────────
-let channels = JSON.parse(localStorage.getItem('yf_channels') || '[]');
-// Default starter channels
-if (channels.length === 0) {
-  channels = [
-    { id: 'UCVHFbw7woebKtfvug_tMXOQ', name: 'Wendover Productions' },
-    { id: 'UCR1IuLEqb6UEA9zDORR4HGg', name: 'Tom Scott' },
-  ];
-  save();
-}
-
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let channels = JSON.parse(localStorage.getItem('yf2_channels') || 'null') || [
+  { id: 'UCVHFbw7woebKtfvug_tMXOQ', name: 'Wendover Productions' },
+  { id: 'UCR1IuLEqb6UEA9zDORR4HGg', name: 'Tom Scott' },
+];
 let allVideos = [];
-let activeChannel = null;
-let loading = false;
+let activeFilter = null; // null = all
+let isLoading = false;
 
-// ─── PERSIST ─────────────────────────────────────────────────────────────────
-function save() {
-  localStorage.setItem('yf_channels', JSON.stringify(channels));
+function save() { localStorage.setItem('yf2_channels', JSON.stringify(channels)); }
+
+// ── CHIPS ─────────────────────────────────────────────────────────────────────
+function renderChips() {
+  const el = document.getElementById('chips');
+  if (channels.length === 0) { el.innerHTML = ''; return; }
+
+  el.innerHTML = `
+    <div class="chip chip-all ${activeFilter === null ? 'active' : ''}" onclick="setFilter(null)">All</div>
+    ${channels.map(ch => `
+      <div class="chip ${activeFilter === ch.id ? 'active' : ''}" onclick="setFilter('${ch.id}')" id="chip_${ch.id}">
+        <div class="chip-avatar" id="chipav_${ch.id}">${(ch.name||ch.id)[0].toUpperCase()}</div>
+        ${ch.name || ch.id}
+      </div>
+    `).join('')}
+  `;
 }
 
-// ─── RENDER SIDEBAR ──────────────────────────────────────────────────────────
-function renderSidebar() {
-  const list = document.getElementById('channelList');
-  list.innerHTML = channels.map((ch, i) => `
-    <div class="channel-item ${activeChannel === ch.id ? 'active' : ''}" onclick="showChannel('${ch.id}')">
-      <div class="channel-avatar" id="av_${ch.id}">${(ch.name || ch.id).charAt(0).toUpperCase()}</div>
-      <div class="channel-name">${ch.name || ch.id}</div>
-      <button class="channel-remove" title="Remove" onclick="removeChannel(event,'${ch.id}')">×</button>
-    </div>
-  `).join('');
-
-  const allBtn = document.getElementById('allBtn');
-  allBtn.className = 'all-channels' + (activeChannel === null ? ' active' : '');
+function setFilter(id) {
+  activeFilter = id;
+  renderChips();
+  renderFeed();
 }
 
-// ─── ADD / REMOVE CHANNEL ────────────────────────────────────────────────────
-function addChannel() {
-  const idInput = document.getElementById('channelIdInput');
-  const nameInput = document.getElementById('channelNameInput');
-  const id = idInput.value.trim();
-  const name = nameInput.value.trim();
+// ── FEED ──────────────────────────────────────────────────────────────────────
+function renderFeed() {
+  const el = document.getElementById('feed');
+  const videos = activeFilter ? allVideos.filter(v => v.channelId === activeFilter) : allVideos;
 
-  if (!id) { idInput.focus(); return; }
-  if (!id.startsWith('UC') || id.length < 20) {
-    showError('Channel ID should start with "UC" and be ~24 characters. Check the help guide above.');
+  if (isLoading && videos.length === 0) {
+    el.innerHTML = `<div class="loading-state"><div class="spinner"></div></div>`;
     return;
   }
-  if (channels.find(c => c.id === id)) {
-    showError('This channel is already in your list.');
-    return;
-  }
-
-  channels.push({ id, name: name || id });
-  save();
-  idInput.value = '';
-  nameInput.value = '';
-  renderSidebar();
-  fetchChannel({ id, name: name || id }, true);
-}
-
-function removeChannel(e, id) {
-  e.stopPropagation();
-  channels = channels.filter(c => c.id !== id);
-  save();
-  allVideos = allVideos.filter(v => v.channelId !== id);
-  if (activeChannel === id) showAll();
-  else { renderSidebar(); renderVideos(); }
-}
-
-// ─── FETCH ───────────────────────────────────────────────────────────────────
-const PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
-
-async function fetchChannel(ch, prepend = false) {
-  const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`;
-  try {
-    const res = await fetch(PROXY + encodeURIComponent(url));
-    const data = await res.json();
-    if (data.status !== 'ok') throw new Error(data.message || 'Feed error');
-
-    // extract avatar from first item thumbnail
-    const videos = (data.items || []).map(item => ({
-      channelId: ch.id,
-      channelName: ch.name || data.feed.title || ch.id,
-      channelAvatar: data.feed.image || null,
-      title: item.title,
-      link: item.link,
-      videoId: (item.link.match(/v=([^&]+)/) || [])[1] || '',
-      published: new Date(item.pubDate),
-      thumbnail: item.thumbnail || (item.enclosure && item.enclosure.link) || '',
-    }));
-
-    // Update channel name from feed if not set
-    if (!ch.name || ch.name === ch.id) {
-      const idx = channels.findIndex(c => c.id === ch.id);
-      if (idx !== -1) {
-        channels[idx].name = data.feed.title || ch.id;
-        save();
-      }
-    }
-
-    // Store avatar for sidebar
-    if (data.feed.image) {
-      const avEl = document.getElementById('av_' + ch.id);
-      if (avEl) avEl.innerHTML = `<img src="${data.feed.image}" onerror="this.style.display='none'">`;
-    }
-
-    // Merge into allVideos
-    allVideos = allVideos.filter(v => v.channelId !== ch.id);
-    allVideos.push(...videos);
-    allVideos.sort((a, b) => b.published - a.published);
-
-    renderSidebar();
-    renderVideos();
-  } catch (err) {
-    console.warn('Feed error for', ch.id, err);
-  }
-}
-
-async function refreshAll() {
-  if (loading) return;
-  loading = true;
-  allVideos = [];
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
-  clearError();
-  renderVideos();
-
-  await Promise.allSettled(channels.map(ch => fetchChannel(ch)));
-
-  loading = false;
-  btn.classList.remove('spinning');
-  renderSidebar();
-  renderVideos();
-}
-
-// ─── DISPLAY ──────────────────────────────────────────────────────────────────
-function showAll() {
-  activeChannel = null;
-  renderSidebar();
-  renderVideos();
-  document.getElementById('feedTitle').textContent = 'All Channels';
-}
-
-function showChannel(id) {
-  activeChannel = id;
-  const ch = channels.find(c => c.id === id);
-  document.getElementById('feedTitle').textContent = ch ? ch.name || ch.id : id;
-  renderSidebar();
-  renderVideos();
-}
-
-function renderVideos() {
-  const content = document.getElementById('feedContent');
-  const countEl = document.getElementById('feedCount');
-
-  const videos = activeChannel
-    ? allVideos.filter(v => v.channelId === activeChannel)
-    : allVideos;
 
   if (channels.length === 0) {
-    countEl.textContent = '';
-    content.innerHTML = `
+    el.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📭</div>
+        <div class="empty-icon">📺</div>
         <div class="empty-title">No channels yet</div>
-        <div class="empty-body">Add your first YouTube channel using the sidebar. Paste the Channel ID (starts with UC…) to get started.</div>
+        <div class="empty-body">Paste a YouTube Channel ID above and tap Add to get started.</div>
       </div>`;
-    return;
-  }
-
-  if (allVideos.length === 0 && loading) {
-    countEl.textContent = '';
-    content.innerHTML = `<div class="loading"><div class="spinner"></div><div class="loading-text">Loading your feeds…</div></div>`;
     return;
   }
 
   if (videos.length === 0) {
-    countEl.textContent = '';
-    content.innerHTML = `
+    el.innerHTML = `
       <div class="empty-state">
-        <div class="empty-icon">📺</div>
-        <div class="empty-title">No videos found</div>
-        <div class="empty-body">Videos from your channels will appear here once loaded. Try refreshing.</div>
+        <div class="empty-icon">🔄</div>
+        <div class="empty-title">Loading videos…</div>
       </div>`;
     return;
   }
 
-  countEl.textContent = `${videos.length} video${videos.length !== 1 ? 's' : ''}`;
-
   const now = Date.now();
-  content.innerHTML = `<div class="video-grid">${videos.map(v => {
+  el.innerHTML = videos.map((v, i) => {
     const isNew = (now - v.published.getTime()) < 48 * 3600 * 1000;
-    const ago = timeAgo(v.published);
-    const thumb = v.videoId
-      ? `https://img.youtube.com/vi/${v.videoId}/mqdefault.jpg`
-      : v.thumbnail;
-    const avatarInitial = (v.channelName || '').charAt(0).toUpperCase();
+    const thumb = v.videoId ? `https://img.youtube.com/vi/${v.videoId}/mqdefault.jpg` : v.thumbnail;
     return `
-      <a class="video-card" href="${v.link}" target="_blank" rel="noopener">
+      <a class="video-card" href="${v.link}" target="_blank" rel="noopener" style="animation-delay:${Math.min(i*30,300)}ms">
         <div class="thumbnail">
-          <img src="${thumb}" alt="${esc(v.title)}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=&quot;http://www.w3.org/2000/svg&quot; width=&quot;320&quot; height=&quot;180&quot;><rect fill=&quot;%231a1a1a&quot; width=&quot;320&quot; height=&quot;180&quot;/></svg>'">
-          ${isNew ? '<div class="new-badge">New</div>' : ''}
+          <img src="${thumb}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22><rect fill=%22%231a1a1a%22 width=%22320%22 height=%22180%22/></svg>'">
+          ${isNew ? '<div class="new-badge">NEW</div>' : ''}
         </div>
         <div class="card-body">
-          <div class="card-channel">
-            <div class="card-avatar">${v.channelAvatar ? `<img src="${v.channelAvatar}" onerror="this.style.display='none'">` : ''}${avatarInitial}</div>
-            <div class="card-channel-name">${esc(v.channelName)}</div>
+          <div class="card-meta">
+            <div class="card-avatar">${v.channelAvatar ? `<img src="${v.channelAvatar}">` : v.channelName[0]}</div>
+            <div class="card-channel">${esc(v.channelName)}</div>
+            <div class="card-date">${timeAgo(v.published)}</div>
           </div>
           <div class="card-title">${esc(v.title)}</div>
-          <div class="card-date">${ago}</div>
         </div>
       </a>`;
-  }).join('')}</div>`;
+  }).join('');
 }
 
-// ─── UTILS ────────────────────────────────────────────────────────────────────
+// ── FETCH ─────────────────────────────────────────────────────────────────────
+const PROXY = 'https://api.rss2json.com/v1/api.json?rss_url=';
+
+async function fetchChannel(ch) {
+  try {
+    const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`;
+    const res = await fetch(PROXY + encodeURIComponent(url));
+    const data = await res.json();
+    if (data.status !== 'ok') return;
+
+    const feedTitle = data.feed.title;
+    const feedAvatar = data.feed.image || null;
+
+    // Update channel name
+    const idx = channels.findIndex(c => c.id === ch.id);
+    if (idx !== -1 && (!channels[idx].name || channels[idx].name === ch.id)) {
+      channels[idx].name = feedTitle || ch.id;
+      save();
+    }
+
+    // Update chip avatar
+    if (feedAvatar) {
+      const avEl = document.getElementById('chipav_' + ch.id);
+      if (avEl) avEl.innerHTML = `<img src="${feedAvatar}">`;
+    }
+
+    const videos = (data.items || []).map(item => ({
+      channelId: ch.id,
+      channelName: feedTitle || ch.name || ch.id,
+      channelAvatar: feedAvatar,
+      title: item.title,
+      link: item.link,
+      videoId: (item.link.match(/v=([^&]+)/) || [])[1] || '',
+      published: new Date(item.pubDate),
+      thumbnail: item.thumbnail || '',
+    }));
+
+    allVideos = allVideos.filter(v => v.channelId !== ch.id);
+    allVideos.push(...videos);
+    allVideos.sort((a, b) => b.published - a.published);
+
+    renderChips();
+    renderFeed();
+  } catch (e) {
+    console.warn('Failed to fetch', ch.id, e);
+  }
+}
+
+async function refreshAll() {
+  if (isLoading) return;
+  isLoading = true;
+  allVideos = [];
+  document.getElementById('refreshBtn').classList.add('spinning');
+  renderFeed();
+  await Promise.allSettled(channels.map(fetchChannel));
+  isLoading = false;
+  document.getElementById('refreshBtn').classList.remove('spinning');
+  renderFeed();
+}
+
+// ── ADD CHANNEL ───────────────────────────────────────────────────────────────
+async function addChannel() {
+  const input = document.getElementById('channelInput');
+  const raw = input.value.trim();
+  if (!raw) { input.focus(); return; }
+
+  // Extract ID if someone pastes a full URL
+  let id = raw;
+  const match = raw.match(/channel\/(UC[a-zA-Z0-9_-]{20,})/);
+  if (match) id = match[1];
+
+  if (!id.startsWith('UC') || id.length < 20) {
+    showToast('Channel ID should start with UC… — tap "How to find it" below');
+    return;
+  }
+  if (channels.find(c => c.id === id)) {
+    showToast('Channel already added!');
+    return;
+  }
+
+  channels.push({ id, name: id });
+  save();
+  input.value = '';
+  input.blur();
+  renderChips();
+  await fetchChannel(channels[channels.length - 1]);
+}
+
+// ── MANAGE SHEET ──────────────────────────────────────────────────────────────
+function openSheet() {
+  renderSheet();
+  document.getElementById('sheetOverlay').classList.add('open');
+}
+
+function closeSheet() {
+  document.getElementById('sheetOverlay').classList.remove('open');
+}
+
+function handleSheetClick(e) {
+  if (e.target === document.getElementById('sheetOverlay')) closeSheet();
+}
+
+function renderSheet() {
+  const el = document.getElementById('sheetList');
+  if (channels.length === 0) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:12px 0">No channels added yet.</p>';
+    return;
+  }
+  el.innerHTML = channels.map(ch => `
+    <div class="sheet-channel">
+      <div class="sheet-avatar">${ch.name[0].toUpperCase()}</div>
+      <div class="sheet-name">${esc(ch.name || ch.id)}</div>
+      <button class="remove-btn" onclick="removeChannel('${ch.id}')">Remove</button>
+    </div>
+  `).join('');
+}
+
+function removeChannel(id) {
+  channels = channels.filter(c => c.id !== id);
+  save();
+  allVideos = allVideos.filter(v => v.channelId !== id);
+  if (activeFilter === id) activeFilter = null;
+  renderSheet();
+  renderChips();
+  renderFeed();
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
 function timeAgo(date) {
   const diff = Date.now() - date.getTime();
-  const mins = Math.floor(diff / 60000);
-  const hrs = Math.floor(mins / 60);
-  const days = Math.floor(hrs / 24);
-  const weeks = Math.floor(days / 7);
-  const months = Math.floor(days / 30);
-  if (mins < 60) return `${mins}m ago`;
-  if (hrs < 24) return `${hrs}h ago`;
-  if (days < 7) return `${days}d ago`;
-  if (weeks < 5) return `${weeks}w ago`;
-  if (months < 12) return `${months}mo ago`;
+  const m = Math.floor(diff / 60000);
+  const h = Math.floor(m / 60);
+  const d = Math.floor(h / 24);
+  const w = Math.floor(d / 7);
+  const mo = Math.floor(d / 30);
+  if (m < 60) return `${m}m ago`;
+  if (h < 24) return `${h}h ago`;
+  if (d < 7) return `${d}d ago`;
+  if (w < 5) return `${w}w ago`;
+  if (mo < 12) return `${mo}mo ago`;
   return date.toLocaleDateString();
 }
 
-function esc(str) {
-  return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+function esc(s) {
+  return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function showError(msg) {
-  document.getElementById('errorBanner').innerHTML = `<div class="error-banner">${msg}</div>`;
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
-function clearError() {
-  document.getElementById('errorBanner').innerHTML = '';
-}
 
-function openHelp() { document.getElementById('helpModal').classList.add('open'); }
-function closeHelp() { document.getElementById('helpModal').classList.remove('open'); }
-
-document.getElementById('helpModal').addEventListener('click', function(e) {
-  if (e.target === this) closeHelp();
-});
-
-document.getElementById('channelIdInput').addEventListener('keydown', e => {
+document.getElementById('channelInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') addChannel();
 });
 
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-renderSidebar();
-renderVideos();
+// ── INIT ──────────────────────────────────────────────────────────────────────
+renderChips();
+renderFeed();
 refreshAll();
 </script>
 

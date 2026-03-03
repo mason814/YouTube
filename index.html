@@ -458,15 +458,39 @@ svg { display: block; }
 
 <script>
 // ── STATE ─────────────────────────────────────────────────────────────────────
-let channels = JSON.parse(localStorage.getItem('yf2_channels') || 'null') || [
+
+// Save to BOTH localStorage and a cookie for maximum Safari/iOS persistence
+function save() {
+  const data = JSON.stringify(channels);
+  // localStorage
+  try { localStorage.setItem('yf2_channels', data); } catch(e) {}
+  // Cookie (expires 1 year) as backup
+  try {
+    const expires = new Date(Date.now() + 365*24*60*60*1000).toUTCString();
+    document.cookie = `yf2=${encodeURIComponent(data)};expires=${expires};path=/;SameSite=Lax`;
+  } catch(e) {}
+}
+
+// Load from localStorage first, fall back to cookie
+function load() {
+  try {
+    const ls = localStorage.getItem('yf2_channels');
+    if (ls) return JSON.parse(ls);
+  } catch(e) {}
+  try {
+    const match = document.cookie.match(/(?:^|;\s*)yf2=([^;]*)/);
+    if (match) return JSON.parse(decodeURIComponent(match[1]));
+  } catch(e) {}
+  return null;
+}
+
+let channels = load() || [
   { id: 'UCVHFbw7woebKtfvug_tMXOQ', name: 'Wendover Productions' },
   { id: 'UCR1IuLEqb6UEA9zDORR4HGg', name: 'Tom Scott' },
 ];
 let allVideos = [];
 let activeFilter = null; // null = all
 let isLoading = false;
-
-function save() { localStorage.setItem('yf2_channels', JSON.stringify(channels)); }
 
 // ── CHIPS ─────────────────────────────────────────────────────────────────────
 function renderChips() {

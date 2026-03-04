@@ -636,13 +636,15 @@ async function addChannel() {
   const raw = input.value.trim();
   if (!raw) { input.focus(); return; }
 
-  // Extract ID if someone pastes a full URL
+  // Extract ID from full URL or raw paste
   let id = raw;
-  const match = raw.match(/channel\/(UC[a-zA-Z0-9_-]{20,})/);
-  if (match) id = match[1];
+  const urlMatch = raw.match(/channel\/(UC[a-zA-Z0-9_-]+)/);
+  if (urlMatch) id = urlMatch[1];
+  // Strip any accidental whitespace or newlines
+  id = id.replace(/\s+/g, '');
 
-  if (!id.startsWith('UC') || id.length < 20) {
-    showToast('Channel ID should start with UC… — tap "How to find it" below');
+  if (!id.startsWith('UC') || id.length < 10) {
+    showToast('Paste a Channel ID starting with UC… or a full channel URL');
     return;
   }
   if (channels.find(c => c.id === id)) {
@@ -650,12 +652,51 @@ async function addChannel() {
     return;
   }
 
-  channels.push({ id, name: id });
+  const newChannel = { id, name: id };
+  channels.push(newChannel);
   save();
   input.value = '';
   input.blur();
   renderChips();
-  await fetchChannel(channels[channels.length - 1]);
+  renderFeed();
+  // Fetch independently of isLoading so it always works
+  try {
+    const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`;
+    const res = await fetch(PROXY + encodeURIComponent(url));
+    const data = await res.json();
+    if (data.status !== 'ok') {
+      showToast('Could not load channel — check the ID and try again');
+      return;
+    }
+    const feedTitle = data.feed.title;
+    const feedAvatar = data.feed.image || null;
+    const idx = channels.findIndex(c => c.id === id);
+    if (idx !== -1) { channels[idx].name = feedTitle || id; save(); }
+
+    const videos = (data.items || []).map(item => ({
+      channelId: id,
+      channelName: feedTitle || id,
+      channelAvatar: feedAvatar,
+      title: item.title,
+      link: item.link,
+      videoId: (item.link.match(/v=([^&]+)/) || [])[1] || '',
+      published: new Date(item.pubDate),
+      thumbnail: item.thumbnail || '',
+    })).filter(v => {
+      if (v.link && v.link.includes('/shorts/')) return false;
+      if (v.title && /#shorts?\b/i.test(v.title)) return false;
+      return true;
+    });
+
+    allVideos = allVideos.filter(v => v.channelId !== id);
+    allVideos.push(...videos);
+    allVideos.sort((a, b) => b.published - a.published);
+    renderChips();
+    renderFeed();
+    showToast(`✓ Added ${feedTitle || id}`);
+  } catch(e) {
+    showToast('Failed to load channel — check your connection');
+  }
 }
 
 // ── MANAGE SHEET ──────────────────────────────────────────────────────────────

@@ -600,7 +600,12 @@ async function fetchChannel(ch) {
       videoId: (item.link.match(/v=([^&]+)/) || [])[1] || '',
       published: new Date(item.pubDate),
       thumbnail: item.thumbnail || '',
-    }));
+    })).filter(v => {
+      // Remove YouTube Shorts (URL /shorts/ or title tagged #shorts)
+      if (v.link && v.link.includes('/shorts/')) return false;
+      if (v.title && /#shorts?\b/i.test(v.title)) return false;
+      return true;
+    });
 
     allVideos = allVideos.filter(v => v.channelId !== ch.id);
     allVideos.push(...videos);

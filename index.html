@@ -293,31 +293,45 @@ function fmtDuration(secs) {
 function pad(n) { return n < 10 ? '0'+n : ''+n; }
 
 // Resolve a UC channel ID from a handle like @alexhormozi or channel name
+async function apiGet(url) {
+  var res = await fetch(url, { referrerPolicy: 'no-referrer' });
+  var d   = await res.json();
+  if (d.error) {
+    var reason = (d.error.errors && d.error.errors[0] && d.error.errors[0].reason) || '';
+    if (reason === 'quotaExceeded') {
+      toast('⚠️ API daily limit reached — try again tomorrow');
+    } else if (reason === 'keyInvalid' || d.error.code === 400) {
+      toast('⚠️ API key issue — check Google Cloud Console');
+    } else if (d.error.code === 403) {
+      toast('⚠️ API key is restricted — go to Google Cloud → Credentials → remove HTTP referrer restrictions');
+    } else {
+      toast('API error ' + d.error.code + ': ' + (d.error.message || ''));
+    }
+    console.warn('API error:', d.error);
+    throw new Error('API error: ' + d.error.message);
+  }
+  return d;
+}
+
 async function resolveChannelId(input) {
   input = input.trim();
 
   // Already a UC id
   if (/^UC[a-zA-Z0-9_-]{10,}$/.test(input)) return input;
 
-  // Strip leading @ if present
-  var handle = input.startsWith('@') ? input : null;
-  var query  = input.replace(/^@/, '');
+  var query = input.replace(/^@/, '');
 
-  // Try handle lookup first (forHandle param)
+  // Try handle lookup first
   try {
-    var url = YT_API + '/channels?part=id&forHandle=' + encodeURIComponent(query) + '&key=' + API_KEY;
-    var res = await fetch(url);
-    var d   = await res.json();
+    var d = await apiGet(YT_API + '/channels?part=id&forHandle=' + encodeURIComponent(query) + '&key=' + API_KEY);
     if (d.items && d.items.length) return d.items[0].id;
-  } catch(e) {}
+  } catch(e) { console.warn('handle lookup failed', e.message); return null; }
 
   // Fall back to search
   try {
-    var url2 = YT_API + '/search?part=snippet&type=channel&q=' + encodeURIComponent(query) + '&maxResults=1&key=' + API_KEY;
-    var res2 = await fetch(url2);
-    var d2   = await res2.json();
+    var d2 = await apiGet(YT_API + '/search?part=snippet&type=channel&q=' + encodeURIComponent(query) + '&maxResults=1&key=' + API_KEY);
     if (d2.items && d2.items.length) return d2.items[0].snippet.channelId;
-  } catch(e) {}
+  } catch(e) { console.warn('search fallback failed', e.message); return null; }
 
   return null;
 }
@@ -328,26 +342,14 @@ async function fetchOne(ch) {
     // 1. Get latest 25 video IDs from the channel
     var searchUrl = YT_API + '/search?part=snippet&channelId=' + ch.id +
       '&type=video&order=date&maxResults=25&key=' + API_KEY;
-    var sRes  = await fetch(searchUrl);
-    var sData = await sRes.json();
-    if (sData.error) {
-      var reason = sData.error.errors && sData.error.errors[0] && sData.error.errors[0].reason;
-      if (reason === 'quotaExceeded') {
-        toast('⚠️ YouTube API daily limit reached — resets at midnight Pacific time');
-      } else {
-        toast('API error: ' + (sData.error.message || 'unknown'));
-      }
-      console.warn('API error', sData.error);
-      return false;
-    }
+    var sData = await apiGet(searchUrl);
     if (!sData.items || !sData.items.length) return false;
 
     var ids = sData.items.map(function(i){ return i.id.videoId; }).join(',');
 
     // 2. Get durations + details for those videos
     var detailUrl = YT_API + '/videos?part=contentDetails,snippet&id=' + ids + '&key=' + API_KEY;
-    var dRes  = await fetch(detailUrl);
-    var dData = await dRes.json();
+    var dData = await apiGet(detailUrl);
     if (!dData.items) return false;
 
     // Update channel name

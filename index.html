@@ -188,91 +188,81 @@ if (channels.length > 0) fetchAll();
 async function fetchOne(ch) {
   var feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + ch.id;
 
-  // Try two different proxies in case one is down or rate-limiting
+  // Try multiple proxies — all parse raw XML so no JSON API dependency
   var proxies = [
-    'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl),
-    'https://api.allorigins.win/get?url=' + encodeURIComponent(feedUrl),
+    'https://corsproxy.io/?' + encodeURIComponent(feedUrl),
+    'https://api.allorigins.win/raw?url=' + encodeURIComponent(feedUrl),
+    'https://thingproxy.freeboard.io/fetch/' + feedUrl,
   ];
 
-  var data = null;
-  var items = [];
+  var xml = null;
 
-  // --- Try rss2json first ---
-  try {
-    var res1 = await fetch(proxies[0]);
-    var d1   = await res1.json();
-    if (d1 && d1.status === 'ok' && d1.items && d1.items.length > 0) {
-      data  = d1;
-      items = d1.items;
-    }
-  } catch(e) { console.warn('rss2json failed', e.message); }
-
-  // --- Fallback: allorigins (returns raw XML, parse manually) ---
-  if (!data) {
+  for (var i = 0; i < proxies.length; i++) {
     try {
-      var res2  = await fetch(proxies[1]);
-      var d2    = await res2.json();
-      var xml   = d2 && d2.contents ? d2.contents : '';
-      if (xml) {
-        var parser   = new DOMParser();
-        var xmlDoc   = parser.parseFromString(xml, 'text/xml');
-        var entries  = xmlDoc.querySelectorAll('entry');
-        var chanName = (xmlDoc.querySelector('author name') || {}).textContent || ch.name || ch.id;
-        items = Array.from(entries).map(function(e) {
-          var videoId = (e.querySelector('videoId') || {}).textContent || '';
-          if (!videoId) {
-            var link = (e.querySelector('link') || {}).getAttribute('href') || '';
-            videoId  = (link.match(/[?&]v=([^&]+)/) || [])[1] || '';
-          }
-          var title   = (e.querySelector('title') || {}).textContent || '';
-          var pubDate = (e.querySelector('published') || {}).textContent || '';
-          return {
-            channelId:   ch.id,
-            channelName: chanName,
-            title:       title,
-            link:        'https://www.youtube.com/watch?v=' + videoId,
-            videoId:     videoId,
-            thumb:       videoId ? ('https://img.youtube.com/vi/' + videoId + '/mqdefault.jpg') : '',
-            pub:         new Date(pubDate),
-          };
-        });
-        // Fake data object so name-update code below works
-        data = { feed: { title: chanName }, items: items };
-      }
-    } catch(e) { console.warn('allorigins failed', e.message); }
+      var res = await fetch(proxies[i]);
+      if (!res.ok) continue;
+      var text = await res.text();
+      if (text && text.indexOf('<entry>') !== -1) { xml = text; break; }
+    } catch(e) { console.warn('proxy ' + i + ' failed:', e.message); }
   }
 
-  if (!data || items.length === 0) {
-    console.warn('Both proxies failed for', ch.id);
+  if (!xml) {
+    console.warn('All proxies failed for', ch.id);
     return false;
   }
 
-  // Update stored name
-  var name = (data.feed && data.feed.title) ? data.feed.title : (ch.name || ch.id);
-  var idx  = channels.findIndex(function(c) { return c.id === ch.id; });
-  if (idx !== -1) { channels[idx].name = name; saveChannels(channels); }
+  // Parse the raw XML
+  var parser  = new DOMParser();
+  var xmlDoc  = parser.parseFromString(xml, 'text/xml');
+  var entries = xmlDoc.querySelectorAll('entry');
 
-  // Normalize items from rss2json format if needed
-  var normalized = items.map(function(item) {
-    // Already normalized (from allorigins path)
-    if (item.channelId) return item;
-    var link    = item.link || '';
-    var videoId = (link.match(/[?&]v=([^&]+)/) || [])[1] || '';
+  if (!entries.length) { console.warn('No entries in feed for', ch.id); return false; }
+
+  var chanName = '';
+  var authorEl = xmlDoc.querySelector('author name');
+  if (authorEl) chanName = authorEl.textContent;
+  if (!chanName) {
+    var titleEl = xmlDoc.querySelector('feed > title');
+    if (titleEl) chanName = titleEl.textContent;
+  }
+  if (!chanName) chanName = ch.name || ch.id;
+
+  // Update stored name
+  var idx = channels.findIndex(function(c) { return c.id === ch.id; });
+  if (idx !== -1) { channels[idx].name = chanName; saveChannels(channels); }
+
+  var normalized = Array.from(entries).map(function(e) {
+    var videoId = '';
+    var vidEl = e.getElementsByTagNameNS('http://www.youtube.com/xml/schemas/2015', 'videoId')[0];
+    if (vidEl) videoId = vidEl.textContent;
+    if (!videoId) {
+      var linkEl = e.querySelector('link[rel="alternate"]');
+      if (linkEl) {
+        var href = linkEl.getAttribute('href') || '';
+        videoId = (href.match(/[?&]v=([^&]+)/) || [])[1] || '';
+      }
+    }
+    var titleEl   = e.querySelector('title');
+    var pubEl     = e.querySelector('published');
+    var title     = titleEl ? titleEl.textContent : '';
+    var pubDate   = pubEl   ? pubEl.textContent   : '';
     return {
       channelId:   ch.id,
-      channelName: name,
-      title:       item.title || '',
-      link:        link,
+      channelName: chanName,
+      title:       title,
+      link:        videoId ? ('https://www.youtube.com/watch?v=' + videoId) : '',
       videoId:     videoId,
-      thumb:       videoId ? ('https://img.youtube.com/vi/' + videoId + '/mqdefault.jpg') : (item.thumbnail || ''),
-      pub:         new Date(item.pubDate),
+      thumb:       videoId ? ('https://img.youtube.com/vi/' + videoId + '/mqdefault.jpg') : '',
+      pub:         pubDate ? new Date(pubDate) : new Date(0),
     };
   }).filter(function(v) {
-    if (!v.link) return false;
+    if (!v.videoId) return false;
     if (v.link.indexOf('/shorts/') !== -1) return false;
-    if (/#shorts?\b/i.test(v.title)) return false;
+    if (/#shorts?/i.test(v.title)) return false;
     return true;
   });
+
+  if (!normalized.length) return false;
 
   videos = videos.filter(function(v) { return v.channelId !== ch.id; }).concat(normalized);
   videos.sort(function(a,b) { return b.pub - a.pub; });

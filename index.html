@@ -423,8 +423,18 @@ async function addChannel() {
   input.value = ''; input.blur();
   toast('Looking up channel…');
 
-  var id = await resolveChannelId(raw);
-  if (!id) { toast('Channel not found — try the UC code instead'); return; }
+  var id = null;
+  try {
+    id = await resolveChannelId(raw);
+  } catch(e) {
+    alert('Error looking up channel: ' + e.message);
+    return;
+  }
+
+  if (!id) {
+    alert('Could not find channel "' + raw + '". The API may be blocked or the handle is wrong. Try pasting the UC code directly.');
+    return;
+  }
   if (channels.find(function(c){ return c.id === id; })) { toast('Already in your feed!'); return; }
 
   var ch = { id: id, name: raw.replace(/^@/,'') };

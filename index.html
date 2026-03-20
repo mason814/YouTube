@@ -462,7 +462,7 @@ function closePlayer() {
   document.getElementById('playerVideo').innerHTML = '';
 }
 
-function loadPlayerVideo(idx) {
+function loadPlayerVideo(idx, delayed) {
   var vis = getVisible();
   if (idx < 0 || idx >= vis.length) return;
   var v = vis[idx];
@@ -471,9 +471,21 @@ function loadPlayerVideo(idx) {
   document.getElementById('playerTitle').textContent   = v.title;
   document.getElementById('playerDate').textContent    = ago(v.pub) + '  ·  ' + v.durationFmt;
   document.getElementById('playerYtBtn').href          = v.link;
-  document.getElementById('playerVideo').innerHTML =
-    '<iframe src="https://www.youtube.com/embed/' + v.videoId +
-    '?autoplay=1&playsinline=1&rel=0&modestbranding=1" allow="autoplay; fullscreen" allowfullscreen></iframe>';
+
+  // If delayed, wait until after slide animation finishes before injecting iframe
+  // This ensures Safari autoplay triggers properly on the new video
+  function injectIframe() {
+    var src = 'https://www.youtube.com/embed/' + v.videoId +
+      '?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1';
+    document.getElementById('playerVideo').innerHTML =
+      '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+  }
+
+  if (delayed) {
+    setTimeout(injectIframe, 350); // wait for slide animation to complete
+  } else {
+    injectIframe();
+  }
 }
 
 function playerNext() {
@@ -487,20 +499,38 @@ function playerPrev() {
 }
 function animateSlide(dir) {
   var slide = document.getElementById('playerSlide');
-  slide.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
-  slide.style.transform  = 'translateY(' + (dir==='up'?'-100%':'100%') + ')';
+  // Clear current iframe immediately so it stops playing
   document.getElementById('playerVideo').innerHTML = '';
+  // Update info text right away
+  var vis = getVisible();
+  var v = vis[playerIdx];
+  document.getElementById('playerCounter').textContent = (playerIdx+1) + ' / ' + vis.length;
+  document.getElementById('playerChannel').textContent = v.channelName;
+  document.getElementById('playerTitle').textContent   = v.title;
+  document.getElementById('playerDate').textContent    = ago(v.pub) + '  ·  ' + v.durationFmt;
+  document.getElementById('playerYtBtn').href          = v.link;
+  // Slide out
+  slide.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.2,1)';
+  slide.style.transform  = 'translateY(' + (dir==='up'?'-100%':'100%') + ')';
   setTimeout(function() {
+    // Jump to other side instantly
     slide.style.transition = 'none';
     slide.style.transform  = 'translateY(' + (dir==='up'?'100%':'-100%') + ')';
-    loadPlayerVideo(playerIdx);
+    // Slide in
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
-        slide.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+        slide.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.2,1)';
         slide.style.transform  = 'translateY(0)';
+        // Inject iframe after slide completes so autoplay fires cleanly
+        setTimeout(function() {
+          var src = 'https://www.youtube.com/embed/' + v.videoId +
+            '?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1';
+          document.getElementById('playerVideo').innerHTML =
+            '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
+        }, 320);
       });
     });
-  }, 300);
+  }, 320);
 }
 
 var pw = document.getElementById('playerWrap');

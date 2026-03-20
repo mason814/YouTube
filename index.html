@@ -38,6 +38,14 @@ background: var(–card); border: 1px solid var(–border); color: var(–muted)
 height: 36px; padding: 0 14px; border-radius: 20px;
 font-size: 13px; font-family: ‘DM Sans’, sans-serif; cursor: pointer;
 }
+.remix-btn {
+background: linear-gradient(135deg, #ff4400, #ffaa00);
+border: none; color: white; height: 36px; padding: 0 14px; border-radius: 20px;
+font-size: 13px; font-weight: 700; font-family: ‘Syne’, sans-serif; cursor: pointer;
+display: flex; align-items: center; gap: 5px; transition: opacity 0.15s;
+}
+.remix-btn:active { opacity: 0.8; transform: scale(0.96); }
+.remix-btn.on { background: linear-gradient(135deg, #ffaa00, #ff4400); box-shadow: 0 0 12px rgba(255,100,0,0.4); }
 .add-bar { display: flex; gap: 8px; margin-bottom: 12px; }
 .add-bar input {
 flex: 1; min-width: 0; background: var(–card); border: 1px solid var(–border); border-radius: 12px;
@@ -147,6 +155,33 @@ animation: hintFade 2s ease 1.5s both;
 @keyframes hintFade { 0%{opacity:0.5} 70%{opacity:0.5} 100%{opacity:0} }
 .swipe-hint span { font-size: 11px; color: white; letter-spacing: 0.05em; }
 
+/* PLAYER THUMB */
+.player-thumb-wrap {
+width: 100%; aspect-ratio: 16/9;
+position: absolute; top: 50%; left: 0; right: 0;
+transform: translateY(-55%);
+background: #000; overflow: hidden;
+}
+.player-thumb-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.player-thumb-overlay {
+position: absolute; inset: 0;
+display: flex; flex-direction: column; align-items: center; justify-content: center;
+gap: 14px; background: rgba(0,0,0,0.35);
+}
+.play-big-btn {
+width: 72px; height: 72px; border-radius: 50%;
+background: #ff0000; border: none; cursor: pointer;
+display: flex; align-items: center; justify-content: center;
+box-shadow: 0 4px 24px rgba(255,0,0,0.5);
+transition: transform 0.15s;
+}
+.play-big-btn:active { transform: scale(0.93); }
+.open-yt-label {
+color: white; font-size: 13px; font-family: ‘DM Sans’, sans-serif;
+background: rgba(0,0,0,0.5); padding: 5px 14px; border-radius: 20px;
+border: 1px solid rgba(255,255,255,0.2);
+}
+
 .toast {
 position: fixed; bottom: calc(24px + var(–safe-bottom)); left: 50%;
 transform: translateX(-50%) translateY(60px);
@@ -165,6 +200,12 @@ white-space: nowrap; z-index: 300; transition: transform 0.25s; pointer-events: 
     <div class="header-top">
       <div class="logo">Your<span>Feed</span></div>
       <div class="header-btns">
+        <button class="remix-btn" id="remixBtn" onclick="toggleRemix()">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
+          </svg>
+          Remix
+        </button>
         <button class="text-btn" onclick="openSheet()">Channels</button>
         <button class="icon-btn" id="refreshBtn" onclick="refreshAll()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
@@ -199,7 +240,7 @@ white-space: nowrap; z-index: 300; transition: transform 0.25s; pointer-events: 
     <a class="player-yt-btn" id="playerYtBtn" target="_blank" rel="noopener">▶ YouTube</a>
   </div>
   <div class="player-slide" id="playerSlide">
-    <div class="player-video" id="playerVideo"></div>
+    <div class="player-thumb-wrap" id="playerThumb"></div>
     <div class="player-info">
       <div class="player-channel" id="playerChannel"></div>
       <div class="player-title" id="playerTitle"></div>
@@ -241,6 +282,29 @@ var channels = loadChannels() || [];
 var videos   = [];
 var filter   = null;
 var loading  = false;
+var remixOn  = false;
+
+function shuffle(arr) {
+  var a = arr.slice();
+  for (var i = a.length - 1; i > 0; i--) {
+    var j = Math.floor(Math.random() * (i + 1));
+    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+  }
+  return a;
+}
+
+function toggleRemix() {
+  remixOn = !remixOn;
+  var btn = document.getElementById('remixBtn');
+  if (remixOn) {
+    btn.classList.add('on');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg> Remixed';
+  } else {
+    btn.classList.remove('on');
+    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg> Remix';
+  }
+  renderFeed();
+}
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
 renderChips(); renderFeed();
@@ -407,7 +471,8 @@ function renderChips() {
 function setFilter(id) { filter = id; renderChips(); renderFeed(); }
 
 function getVisible() {
-  return filter ? videos.filter(function(v){ return v.channelId === filter; }) : videos;
+  var base = filter ? videos.filter(function(v){ return v.channelId === filter; }) : videos;
+  return remixOn ? shuffle(base) : base;
 }
 
 function renderFeed() {
@@ -459,10 +524,10 @@ function openPlayer(idx) {
 function closePlayer() {
   document.getElementById('playerWrap').classList.remove('open');
   document.body.style.overflow = '';
-  document.getElementById('playerVideo').innerHTML = '';
+  document.getElementById('playerThumb').innerHTML = '';
 }
 
-function loadPlayerVideo(idx, delayed) {
+function loadPlayerVideo(idx) {
   var vis = getVisible();
   if (idx < 0 || idx >= vis.length) return;
   var v = vis[idx];
@@ -472,20 +537,26 @@ function loadPlayerVideo(idx, delayed) {
   document.getElementById('playerDate').textContent    = ago(v.pub) + '  ·  ' + v.durationFmt;
   document.getElementById('playerYtBtn').href          = v.link;
 
-  // If delayed, wait until after slide animation finishes before injecting iframe
-  // This ensures Safari autoplay triggers properly on the new video
-  function injectIframe() {
-    var src = 'https://www.youtube.com/embed/' + v.videoId +
-      '?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1';
-    document.getElementById('playerVideo').innerHTML =
-      '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
-  }
+  // Show thumbnail with big play button — tapping opens YouTube app
+  var hqThumb = 'https://img.youtube.com/vi/' + v.videoId + '/hqdefault.jpg';
+  document.getElementById('playerThumb').innerHTML =
+    '<img src="' + hqThumb + '" onerror="this.src='' + v.thumb + ''">' +
+    '<div class="player-thumb-overlay">' +
+      '<button class="play-big-btn" onclick="openInYouTube()">' +
+        '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>' +
+      '</button>' +
+      '<div class="open-yt-label">Tap to watch</div>' +
+    '</div>';
+}
 
-  if (delayed) {
-    setTimeout(injectIframe, 350); // wait for slide animation to complete
-  } else {
-    injectIframe();
-  }
+function openInYouTube() {
+  var vis = getVisible();
+  var v = vis[playerIdx];
+  // Try YouTube app deep link first, fall back to web
+  window.location.href = 'youtube://watch?v=' + v.videoId;
+  setTimeout(function() {
+    window.open('https://www.youtube.com/watch?v=' + v.videoId, '_blank');
+  }, 500);
 }
 
 function playerNext() {
@@ -499,11 +570,9 @@ function playerPrev() {
 }
 function animateSlide(dir) {
   var slide = document.getElementById('playerSlide');
-  // Clear current iframe immediately so it stops playing
-  document.getElementById('playerVideo').innerHTML = '';
-  // Update info text right away
   var vis = getVisible();
   var v = vis[playerIdx];
+  // Update info immediately
   document.getElementById('playerCounter').textContent = (playerIdx+1) + ' / ' + vis.length;
   document.getElementById('playerChannel').textContent = v.channelName;
   document.getElementById('playerTitle').textContent   = v.title;
@@ -513,21 +582,21 @@ function animateSlide(dir) {
   slide.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.2,1)';
   slide.style.transform  = 'translateY(' + (dir==='up'?'-100%':'100%') + ')';
   setTimeout(function() {
-    // Jump to other side instantly
     slide.style.transition = 'none';
     slide.style.transform  = 'translateY(' + (dir==='up'?'100%':'-100%') + ')';
-    // Slide in
+    var hqThumb = 'https://img.youtube.com/vi/' + v.videoId + '/hqdefault.jpg';
+    document.getElementById('playerThumb').innerHTML =
+      '<img src="' + hqThumb + '" onerror="this.src='' + v.thumb + ''">' +
+      '<div class="player-thumb-overlay">' +
+        '<button class="play-big-btn" onclick="openInYouTube()">' +
+          '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>' +
+        '</button>' +
+        '<div class="open-yt-label">Tap to watch</div>' +
+      '</div>';
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         slide.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.2,1)';
         slide.style.transform  = 'translateY(0)';
-        // Inject iframe after slide completes so autoplay fires cleanly
-        setTimeout(function() {
-          var src = 'https://www.youtube.com/embed/' + v.videoId +
-            '?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1&enablejsapi=1';
-          document.getElementById('playerVideo').innerHTML =
-            '<iframe src="' + src + '" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen></iframe>';
-        }, 320);
       });
     });
   }, 320);

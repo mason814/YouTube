@@ -8,411 +8,112 @@
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0c0c0c;
-    --card: #161616;
-    --border: #242424;
-    --accent: #ff4400;
-    --text: #f0f0f0;
-    --muted: #666;
-    --muted2: #444;
-    --success: #00cc66;
-    --safe-top: env(safe-area-inset-top, 0px);
-    --safe-bottom: env(safe-area-inset-bottom, 0px);
+    --bg: #0c0c0c; --card: #161616; --border: #242424; --accent: #ff4400;
+    --text: #f0f0f0; --muted: #666; --muted2: #444;
+    --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
 
-- { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-body {
-background: var(–bg);
-color: var(–text);
-font-family: ‘DM Sans’, sans-serif;
-min-height: 100vh;
-overscroll-behavior: none;
-}
-
-/* ── HEADER ── */
 .header {
-position: sticky;
-top: 0;
-z-index: 50;
+position: sticky; top: 0; z-index: 50;
 background: rgba(12,12,12,0.97);
-backdrop-filter: blur(16px);
--webkit-backdrop-filter: blur(16px);
+backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
 border-bottom: 1px solid var(–border);
 padding-top: var(–safe-top);
 }
-
-.header-inner {
-padding: 14px 16px 12px;
-}
-
-.header-top {
-display: flex;
-align-items: center;
-justify-content: space-between;
-margin-bottom: 12px;
-}
-
-.logo {
-font-family: ‘Syne’, sans-serif;
-font-weight: 800;
-font-size: 20px;
-letter-spacing: -0.5px;
-}
+.header-inner { padding: 14px 16px 0; }
+.header-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+.logo { font-family: ‘Syne’, sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
 .logo span { color: var(–accent); }
+.header-btns { display: flex; gap: 8px; }
 
-.header-actions {
-display: flex;
-gap: 8px;
-align-items: center;
+.icon-btn {
+background: var(–card); border: 1px solid var(–border); color: var(–muted);
+width: 36px; height: 36px; border-radius: 50%;
+display: flex; align-items: center; justify-content: center; cursor: pointer;
+}
+.icon-btn:active { opacity: 0.7; }
+.icon-btn.spinning svg { animation: spin 0.8s linear infinite; }
+.text-btn {
+background: var(–card); border: 1px solid var(–border); color: var(–muted);
+height: 36px; padding: 0 14px; border-radius: 20px;
+font-size: 13px; font-family: ‘DM Sans’, sans-serif; cursor: pointer;
 }
 
-.refresh-btn {
-background: var(–card);
-border: 1px solid var(–border);
-color: var(–muted);
-width: 34px;
-height: 34px;
-border-radius: 50%;
-display: flex;
-align-items: center;
-justify-content: center;
-cursor: pointer;
-transition: all 0.15s;
-}
-.refresh-btn:active { transform: scale(0.92); }
-.refresh-btn.spinning svg { animation: spin 0.8s linear infinite; }
-
-.manage-btn {
-background: var(–card);
-border: 1px solid var(–border);
-color: var(–muted);
-height: 34px;
-padding: 0 14px;
-border-radius: 20px;
-font-size: 13px;
-font-family: ‘DM Sans’, sans-serif;
-cursor: pointer;
-transition: all 0.15s;
-}
-.manage-btn:active { transform: scale(0.95); }
-
-/* ADD CHANNEL BAR */
-.add-bar {
-display: flex;
-gap: 8px;
-}
-
+.add-bar { display: flex; gap: 8px; margin-bottom: 12px; }
 .add-bar input {
-flex: 1;
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 12px;
-color: var(–text);
-font-family: ‘DM Sans’, sans-serif;
-font-size: 14px;
-padding: 10px 14px;
-transition: border-color 0.15s;
-min-width: 0;
+flex: 1; min-width: 0;
+background: var(–card); border: 1px solid var(–border); border-radius: 12px;
+color: var(–text); font-family: ‘DM Sans’, sans-serif; font-size: 14px; padding: 10px 14px;
 }
 .add-bar input:focus { outline: none; border-color: var(–accent); }
 .add-bar input::placeholder { color: var(–muted2); }
-
 .add-btn {
-background: var(–accent);
-color: white;
-font-family: ‘Syne’, sans-serif;
-font-weight: 700;
-font-size: 13px;
-padding: 0 16px;
-border-radius: 12px;
-border: none;
-cursor: pointer;
-white-space: nowrap;
-transition: all 0.15s;
-flex-shrink: 0;
+background: var(–accent); color: white; border: none; border-radius: 12px;
+font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 14px;
+padding: 0 18px; cursor: pointer; flex-shrink: 0;
 }
-.add-btn:active { transform: scale(0.95); opacity: 0.9; }
+.add-btn:active { opacity: 0.8; }
 
-/* CHANNEL CHIPS */
-.channel-chips {
-display: flex;
-gap: 8px;
-overflow-x: auto;
-padding: 10px 16px 12px;
-scrollbar-width: none;
--webkit-overflow-scrolling: touch;
-}
-.channel-chips::-webkit-scrollbar { display: none; }
-
+.chips { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
+.chips::-webkit-scrollbar { display: none; }
 .chip {
-display: flex;
-align-items: center;
-gap: 6px;
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 20px;
-padding: 5px 12px 5px 8px;
-font-size: 13px;
-white-space: nowrap;
-cursor: pointer;
-transition: all 0.15s;
-flex-shrink: 0;
+display: flex; align-items: center; gap: 6px;
+background: var(–card); border: 1px solid var(–border); border-radius: 20px;
+padding: 5px 12px 5px 10px; font-size: 13px; white-space: nowrap;
+cursor: pointer; flex-shrink: 0; color: var(–text);
 }
-.chip.active { border-color: var(–accent); background: #1a0800; color: var(–accent); }
-.chip:active { transform: scale(0.95); }
-
-.chip-avatar {
-width: 20px;
-height: 20px;
-border-radius: 50%;
-background: #222;
-overflow: hidden;
-flex-shrink: 0;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 9px;
-font-weight: 700;
-font-family: ‘Syne’, sans-serif;
-color: var(–accent);
-}
-.chip-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.chip-all { background: var(–accent); border-color: var(–accent); color: white; }
+.chip.active { border-color: var(–accent); background: #1e0800; color: var(–accent); }
+.chip-all { background: var(–accent); border-color: var(–accent); color: white; padding: 5px 14px; font-weight: 600; }
 .chip-all.active { background: var(–accent); }
 
-/* FEED */
-.feed {
-padding: 12px 12px calc(20px + var(–safe-bottom));
-display: flex;
-flex-direction: column;
-gap: 12px;
-}
+.feed { padding: 12px 12px calc(24px + var(–safe-bottom)); display: flex; flex-direction: column; gap: 12px; }
 
-/* VIDEO CARD */
 .video-card {
-background: var(–card);
-border: 1px solid var(–border);
-border-radius: 16px;
-overflow: hidden;
-text-decoration: none;
-color: inherit;
-display: block;
-transition: transform 0.15s;
-animation: fadeUp 0.3s ease both;
+background: var(–card); border: 1px solid var(–border); border-radius: 16px;
+overflow: hidden; text-decoration: none; color: inherit; display: block;
 }
-.video-card:active { transform: scale(0.98); }
-
-@keyframes fadeUp {
-from { opacity: 0; transform: translateY(8px); }
-to { opacity: 1; transform: translateY(0); }
-}
-
-.thumbnail {
-width: 100%;
-aspect-ratio: 16/9;
-background: #1a1a1a;
-position: relative;
-overflow: hidden;
-}
-.thumbnail img {
-width: 100%;
-height: 100%;
-object-fit: cover;
-}
-
+.video-card:active { opacity: 0.8; }
+.thumb { width: 100%; aspect-ratio: 16/9; background: #1a1a1a; position: relative; overflow: hidden; }
+.thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .new-badge {
-position: absolute;
-top: 10px;
-left: 10px;
-background: var(–accent);
-color: white;
-font-size: 10px;
-font-weight: 700;
-font-family: ‘Syne’, sans-serif;
-padding: 3px 8px;
-border-radius: 6px;
-letter-spacing: 0.05em;
+position: absolute; top: 8px; left: 8px;
+background: var(–accent); color: white;
+font-size: 10px; font-weight: 700; font-family: ‘Syne’, sans-serif;
+padding: 2px 8px; border-radius: 6px;
 }
+.card-body { padding: 11px 14px 13px; }
+.card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.card-ch { font-size: 12px; color: var(–muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-time { font-size: 12px; color: var(–muted2); flex-shrink: 0; }
+.card-title { font-size: 15px; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-.card-body {
-padding: 12px 14px 14px;
-}
-
-.card-meta {
-display: flex;
-align-items: center;
-gap: 8px;
-margin-bottom: 7px;
-}
-
-.card-avatar {
-width: 24px;
-height: 24px;
-border-radius: 50%;
-background: #1e1e1e;
-overflow: hidden;
-flex-shrink: 0;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 10px;
-font-weight: 700;
-font-family: ‘Syne’, sans-serif;
-color: var(–accent);
-border: 1px solid var(–border);
-}
-.card-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.card-channel {
-font-size: 12px;
-color: var(–muted);
-font-weight: 500;
-flex: 1;
-white-space: nowrap;
-overflow: hidden;
-text-overflow: ellipsis;
-}
-
-.card-date {
-font-size: 12px;
-color: var(–muted2);
-flex-shrink: 0;
-}
-
-.card-title {
-font-size: 15px;
-font-weight: 500;
-line-height: 1.4;
-display: -webkit-box;
--webkit-line-clamp: 2;
--webkit-box-orient: vertical;
-overflow: hidden;
-}
-
-/* STATES */
-.empty-state, .loading-state {
-display: flex;
-flex-direction: column;
-align-items: center;
-justify-content: center;
-padding: 60px 30px;
-text-align: center;
-gap: 12px;
-}
-
-.empty-icon { font-size: 48px; opacity: 0.3; }
-.empty-title { font-family: ‘Syne’, sans-serif; font-size: 18px; font-weight: 700; color: var(–muted); }
-.empty-body { font-size: 14px; color: var(–muted); line-height: 1.6; opacity: 0.7; }
-
-.spinner {
-width: 32px;
-height: 32px;
-border: 2px solid var(–border);
-border-top-color: var(–accent);
-border-radius: 50%;
-animation: spin 0.7s linear infinite;
-}
+.state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 32px; text-align: center; gap: 10px; }
+.state-icon { font-size: 44px; opacity: 0.25; }
+.state-title { font-family: ‘Syne’, sans-serif; font-size: 18px; font-weight: 700; color: var(–muted); }
+.state-body { font-size: 14px; color: var(–muted); line-height: 1.6; opacity: 0.7; }
+.spinner { width: 30px; height: 30px; border: 2px solid var(–border); border-top-color: var(–accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
-/* MANAGE SHEET */
-.sheet-overlay {
-display: none;
-position: fixed;
-inset: 0;
-background: rgba(0,0,0,0.6);
-z-index: 100;
-align-items: flex-end;
-}
-.sheet-overlay.open { display: flex; }
+.overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 100; align-items: flex-end; }
+.overlay.open { display: flex; }
+.sheet { background: #1c1c1c; border-radius: 20px 20px 0 0; padding: 16px 16px calc(24px + var(–safe-bottom)); width: 100%; max-height: 75vh; overflow-y: auto; }
+.sheet-handle { width: 36px; height: 4px; background: var(–muted2); border-radius: 2px; margin: 0 auto 18px; }
+.sheet-title { font-family: ‘Syne’, sans-serif; font-weight: 800; font-size: 18px; margin-bottom: 14px; }
+.sheet-row { display: flex; align-items: center; gap: 12px; padding: 12px 0; border-bottom: 1px solid var(–border); }
+.sheet-name { flex: 1; font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sheet-id { font-size: 11px; color: var(–muted); font-family: monospace; }
+.del-btn { background: #2a1010; border: none; color: #ff6644; font-size: 12px; font-family: ‘DM Sans’, sans-serif; padding: 6px 12px; border-radius: 8px; cursor: pointer; flex-shrink: 0; }
 
-.sheet {
-background: #1a1a1a;
-border-radius: 20px 20px 0 0;
-padding: 20px 16px calc(20px + var(–safe-bottom));
-width: 100%;
-max-height: 70vh;
-overflow-y: auto;
-}
-
-.sheet-handle {
-width: 36px;
-height: 4px;
-background: var(–muted2);
-border-radius: 2px;
-margin: 0 auto 20px;
-}
-
-.sheet-title {
-font-family: ‘Syne’, sans-serif;
-font-weight: 800;
-font-size: 18px;
-margin-bottom: 16px;
-}
-
-.sheet-channel {
-display: flex;
-align-items: center;
-gap: 12px;
-padding: 12px 0;
-border-bottom: 1px solid var(–border);
-}
-
-.sheet-avatar {
-width: 36px;
-height: 36px;
-border-radius: 50%;
-background: #222;
-overflow: hidden;
-flex-shrink: 0;
-display: flex;
-align-items: center;
-justify-content: center;
-font-size: 13px;
-font-weight: 700;
-font-family: ‘Syne’, sans-serif;
-color: var(–accent);
-}
-.sheet-avatar img { width: 100%; height: 100%; object-fit: cover; }
-
-.sheet-name {
-flex: 1;
-font-size: 14px;
-font-weight: 500;
-}
-
-.remove-btn {
-background: #2a1010;
-border: none;
-color: #ff6644;
-font-size: 12px;
-font-family: ‘DM Sans’, sans-serif;
-padding: 6px 12px;
-border-radius: 8px;
-cursor: pointer;
-}
-
-/* ERROR TOAST */
 .toast {
-position: fixed;
-bottom: calc(20px + var(–safe-bottom));
-left: 50%;
-transform: translateX(-50%) translateY(80px);
-background: #2a1010;
-border: 1px solid #551100;
-color: #ff8844;
-font-size: 13px;
-padding: 10px 18px;
-border-radius: 20px;
-white-space: nowrap;
-z-index: 200;
-transition: transform 0.3s;
-pointer-events: none;
+position: fixed; bottom: calc(24px + var(–safe-bottom)); left: 50%;
+transform: translateX(-50%) translateY(60px);
+background: #1e1e1e; border: 1px solid var(–border); color: var(–text);
+font-size: 13px; padding: 10px 20px; border-radius: 20px;
+white-space: nowrap; z-index: 200; transition: transform 0.25s; pointer-events: none;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
-
-svg { display: block; }
 </style>
 
 </head>
@@ -422,10 +123,10 @@ svg { display: block; }
   <div class="header-inner">
     <div class="header-top">
       <div class="logo">Your<span>Feed</span></div>
-      <div class="header-actions">
-        <button class="manage-btn" onclick="openSheet()">Channels</button>
-        <button class="refresh-btn" id="refreshBtn" onclick="refreshAll()">
-          <svg id="refreshIcon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+      <div class="header-btns">
+        <button class="text-btn" onclick="openSheet()">Channels</button>
+        <button class="icon-btn" id="refreshBtn" onclick="refreshAll()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M23 4v6h-6M1 20v-6h6"/>
             <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
           </svg>
@@ -433,346 +134,267 @@ svg { display: block; }
       </div>
     </div>
     <div class="add-bar">
-      <input type="text" id="channelInput" placeholder="Paste Channel ID (UCxxxxxx…)" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input id="channelInput" type="text" placeholder="Paste Channel ID (UCxxxxxx…)" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <button class="add-btn" onclick="addChannel()">Add</button>
     </div>
   </div>
-  <div class="channel-chips" id="chips"></div>
+  <div class="chips" id="chips"></div>
 </div>
 
 <div class="feed" id="feed"></div>
 
-<!-- MANAGE SHEET -->
-
-<div class="sheet-overlay" id="sheetOverlay" onclick="handleSheetClick(event)">
-  <div class="sheet" id="sheet">
+<div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()">
+  <div class="sheet">
     <div class="sheet-handle"></div>
     <div class="sheet-title">My Channels</div>
     <div id="sheetList"></div>
   </div>
 </div>
 
-<!-- TOAST -->
-
 <div class="toast" id="toast"></div>
 
 <script>
-// ── STATE ─────────────────────────────────────────────────────────────────────
-
-// Save to BOTH localStorage and a cookie for maximum Safari/iOS persistence
-function save() {
-  const data = JSON.stringify(channels);
-  // localStorage
-  try { localStorage.setItem('yf2_channels', data); } catch(e) {}
-  // Cookie (expires 1 year) as backup
+// ── STORAGE ──────────────────────────────────────────────────────────────────
+function saveChannels(chs) {
+  const s = JSON.stringify(chs);
+  try { localStorage.setItem('yf_ch', s); } catch(e) {}
   try {
-    const expires = new Date(Date.now() + 365*24*60*60*1000).toUTCString();
-    document.cookie = `yf2=${encodeURIComponent(data)};expires=${expires};path=/;SameSite=Lax`;
+    const exp = new Date(Date.now() + 365*864e5).toUTCString();
+    document.cookie = 'yf_ch=' + encodeURIComponent(s) + ';expires=' + exp + ';path=/;SameSite=Lax';
   } catch(e) {}
 }
 
-// Load from localStorage first, fall back to cookie
-function load() {
+function loadChannels() {
+  try { const v = localStorage.getItem('yf_ch'); if (v) return JSON.parse(v); } catch(e) {}
   try {
-    const ls = localStorage.getItem('yf2_channels');
-    if (ls) return JSON.parse(ls);
-  } catch(e) {}
-  try {
-    const match = document.cookie.match(/(?:^|;\s*)yf2=([^;]*)/);
-    if (match) return JSON.parse(decodeURIComponent(match[1]));
+    const m = document.cookie.match(/(?:^|;\s*)yf_ch=([^;]*)/);
+    if (m) return JSON.parse(decodeURIComponent(m[1]));
   } catch(e) {}
   return null;
 }
 
-let channels = load() || [
-  { id: 'UCVHFbw7woebKtfvug_tMXOQ', name: 'Wendover Productions' },
-  { id: 'UCR1IuLEqb6UEA9zDORR4HGg', name: 'Tom Scott' },
-];
-let allVideos = [];
-let activeFilter = null; // null = all
-let isLoading = false;
+// ── STATE ────────────────────────────────────────────────────────────────────
+let channels = loadChannels() || [];
+let videos   = [];
+let filter   = null;
+let loading  = false;
 
-// ── CHIPS ─────────────────────────────────────────────────────────────────────
-function renderChips() {
-  const el = document.getElementById('chips');
-  if (channels.length === 0) { el.innerHTML = ''; return; }
+// ── BOOT ─────────────────────────────────────────────────────────────────────
+renderChips();
+renderFeed();
+if (channels.length > 0) fetchAll();
 
-  el.innerHTML = `
-    <div class="chip chip-all ${activeFilter === null ? 'active' : ''}" onclick="setFilter(null)">All</div>
-    ${channels.map(ch => `
-      <div class="chip ${activeFilter === ch.id ? 'active' : ''}" onclick="setFilter('${ch.id}')" id="chip_${ch.id}">
-        <div class="chip-avatar" id="chipav_${ch.id}">${(ch.name||ch.id)[0].toUpperCase()}</div>
-        ${ch.name || ch.id}
-      </div>
-    `).join('')}
-  `;
+// ── FETCH ────────────────────────────────────────────────────────────────────
+async function fetchOne(ch) {
+  const feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + ch.id;
+  const apiUrl  = 'https://api.rss2json.com/v1/api.json?rss_url=' + encodeURIComponent(feedUrl);
+  try {
+    const res  = await fetch(apiUrl);
+    const data = await res.json();
+    if (!data || data.status !== 'ok') return false;
+
+    const name = (data.feed && data.feed.title) ? data.feed.title : (ch.name || ch.id);
+    const idx  = channels.findIndex(function(c) { return c.id === ch.id; });
+    if (idx !== -1) { channels[idx].name = name; saveChannels(channels); }
+
+    var items = (data.items || []).map(function(item) {
+      var link    = item.link || '';
+      var videoId = (link.match(/[?&]v=([^&]+)/) || [])[1] || '';
+      return {
+        channelId:   ch.id,
+        channelName: name,
+        title:       item.title || '',
+        link:        link,
+        videoId:     videoId,
+        thumb:       videoId ? ('https://img.youtube.com/vi/' + videoId + '/mqdefault.jpg') : (item.thumbnail || ''),
+        pub:         new Date(item.pubDate),
+      };
+    }).filter(function(v) {
+      if (!v.link) return false;
+      if (v.link.indexOf('/shorts/') !== -1) return false;
+      if (/#shorts?\b/i.test(v.title)) return false;
+      return true;
+    });
+
+    videos = videos.filter(function(v) { return v.channelId !== ch.id; }).concat(items);
+    videos.sort(function(a,b) { return b.pub - a.pub; });
+    return true;
+  } catch(e) {
+    console.warn('fetchOne failed:', ch.id, e.message);
+    return false;
+  }
 }
 
-function setFilter(id) {
-  activeFilter = id;
+async function fetchAll() {
+  if (loading) return;
+  loading = true;
+  spin(true);
+  videos = [];
+  renderFeed();
+  await Promise.all(channels.map(fetchOne));
+  loading = false;
+  spin(false);
   renderChips();
   renderFeed();
 }
 
-// ── FEED ──────────────────────────────────────────────────────────────────────
-function renderFeed() {
-  const el = document.getElementById('feed');
-  const videos = activeFilter ? allVideos.filter(v => v.channelId === activeFilter) : allVideos;
-
-  if (isLoading && videos.length === 0) {
-    el.innerHTML = `<div class="loading-state"><div class="spinner"></div></div>`;
-    return;
-  }
-
-  if (channels.length === 0) {
-    el.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">📺</div>
-        <div class="empty-title">No channels yet</div>
-        <div class="empty-body">Paste a YouTube Channel ID above and tap Add to get started.</div>
-      </div>`;
-    return;
-  }
-
-  if (videos.length === 0) {
-    el.innerHTML = `
-      <div class="empty-state">
-        <div class="empty-icon">🔄</div>
-        <div class="empty-title">Loading videos…</div>
-      </div>`;
-    return;
-  }
-
-  const now = Date.now();
-  el.innerHTML = videos.map((v, i) => {
-    const isNew = (now - v.published.getTime()) < 48 * 3600 * 1000;
-    const thumb = v.videoId ? `https://img.youtube.com/vi/${v.videoId}/mqdefault.jpg` : v.thumbnail;
-    return `
-      <a class="video-card" href="${v.link}" target="_blank" rel="noopener" style="animation-delay:${Math.min(i*30,300)}ms">
-        <div class="thumbnail">
-          <img src="${thumb}" loading="lazy" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22320%22 height=%22180%22><rect fill=%22%231a1a1a%22 width=%22320%22 height=%22180%22/></svg>'">
-          ${isNew ? '<div class="new-badge">NEW</div>' : ''}
-        </div>
-        <div class="card-body">
-          <div class="card-meta">
-            <div class="card-avatar">${v.channelAvatar ? `<img src="${v.channelAvatar}">` : v.channelName[0]}</div>
-            <div class="card-channel">${esc(v.channelName)}</div>
-            <div class="card-date">${timeAgo(v.published)}</div>
-          </div>
-          <div class="card-title">${esc(v.title)}</div>
-        </div>
-      </a>`;
-  }).join('');
-}
-
-// ── FETCH ─────────────────────────────────────────────────────────────────────
-const PROXY = 'https://api.rss2json.com/v1/api.json?count=50&rss_url=';
-
-async function fetchChannel(ch) {
-  try {
-    const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${ch.id}`;
-    const res = await fetch(PROXY + encodeURIComponent(url));
-    const data = await res.json();
-    if (data.status !== 'ok') return;
-
-    const feedTitle = data.feed.title;
-    const feedAvatar = data.feed.image || null;
-
-    // Update channel name
-    const idx = channels.findIndex(c => c.id === ch.id);
-    if (idx !== -1 && (!channels[idx].name || channels[idx].name === ch.id)) {
-      channels[idx].name = feedTitle || ch.id;
-      save();
-    }
-
-    // Update chip avatar
-    if (feedAvatar) {
-      const avEl = document.getElementById('chipav_' + ch.id);
-      if (avEl) avEl.innerHTML = `<img src="${feedAvatar}">`;
-    }
-
-    const videos = (data.items || []).map(item => ({
-      channelId: ch.id,
-      channelName: feedTitle || ch.name || ch.id,
-      channelAvatar: feedAvatar,
-      title: item.title,
-      link: item.link,
-      videoId: (item.link.match(/v=([^&]+)/) || [])[1] || '',
-      published: new Date(item.pubDate),
-      thumbnail: item.thumbnail || '',
-    })).filter(v => {
-      // Remove YouTube Shorts (URL /shorts/ or title tagged #shorts)
-      if (v.link && v.link.includes('/shorts/')) return false;
-      if (v.title && /#shorts?\b/i.test(v.title)) return false;
-      return true;
-    });
-
-    allVideos = allVideos.filter(v => v.channelId !== ch.id);
-    allVideos.push(...videos);
-    allVideos.sort((a, b) => b.published - a.published);
-
+async function fetchAndAdd(ch) {
+  spin(true);
+  var ok = await fetchOne(ch);
+  spin(false);
+  renderChips();
+  renderFeed();
+  if (ok) {
+    var name = (channels.find(function(c){ return c.id === ch.id; }) || {}).name || ch.id;
+    toast('Added ' + name);
+  } else {
+    toast('Could not load — check the Channel ID');
+    channels = channels.filter(function(c){ return c.id !== ch.id; });
+    saveChannels(channels);
     renderChips();
     renderFeed();
-  } catch (e) {
-    console.warn('Failed to fetch', ch.id, e);
   }
 }
 
-async function refreshAll() {
-  if (isLoading) return;
-  isLoading = true;
-  allVideos = [];
-  document.getElementById('refreshBtn').classList.add('spinning');
-  renderFeed();
-  await Promise.allSettled(channels.map(fetchChannel));
-  isLoading = false;
-  document.getElementById('refreshBtn').classList.remove('spinning');
-  renderFeed();
+function spin(on) {
+  document.getElementById('refreshBtn').classList.toggle('spinning', on);
+}
+
+function refreshAll() {
+  if (channels.length === 0) { toast('Add a channel first!'); return; }
+  fetchAll();
 }
 
 // ── ADD CHANNEL ───────────────────────────────────────────────────────────────
 async function addChannel() {
-  const input = document.getElementById('channelInput');
-  const raw = input.value.trim();
+  var input = document.getElementById('channelInput');
+  var raw   = (input.value || '').trim().replace(/\s+/g, '');
   if (!raw) { input.focus(); return; }
 
-  // Extract ID from full URL or raw paste
-  let id = raw;
-  const urlMatch = raw.match(/channel\/(UC[a-zA-Z0-9_-]+)/);
-  if (urlMatch) id = urlMatch[1];
-  // Strip any accidental whitespace or newlines
-  id = id.replace(/\s+/g, '');
+  // Extract UC id from anywhere in the string (handles full URLs too)
+  var m  = raw.match(/UC[a-zA-Z0-9_-]{10,}/);
+  var id = m ? m[0] : raw;
 
-  if (!id.startsWith('UC') || id.length < 10) {
-    showToast('Paste a Channel ID starting with UC… or a full channel URL');
+  if (!id.startsWith('UC') || id.length < 12) {
+    toast('Paste a Channel ID starting with UC…');
     return;
   }
-  if (channels.find(c => c.id === id)) {
-    showToast('Channel already added!');
+  if (channels.find(function(c){ return c.id === id; })) {
+    toast('Already in your feed!');
     return;
   }
 
-  const newChannel = { id, name: id };
-  channels.push(newChannel);
-  save();
   input.value = '';
   input.blur();
+
+  var ch = { id: id, name: id };
+  channels.push(ch);
+  saveChannels(channels);
+  renderChips();
+  await fetchAndAdd(ch);
+}
+
+// ── RENDER ───────────────────────────────────────────────────────────────────
+function renderChips() {
+  var el = document.getElementById('chips');
+  if (channels.length === 0) { el.innerHTML = ''; return; }
+  el.innerHTML =
+    '<div class="chip chip-all' + (filter===null?' active':'') + '" onclick="setFilter(null)">All</div>' +
+    channels.map(function(ch) {
+      return '<div class="chip' + (filter===ch.id?' active':'') + '" onclick="setFilter(\'' + ch.id + '\')">' + esc(ch.name||ch.id) + '</div>';
+    }).join('');
+}
+
+function setFilter(id) {
+  filter = id;
   renderChips();
   renderFeed();
-  // Fetch independently of isLoading so it always works
-  try {
-    const url = `https://www.youtube.com/feeds/videos.xml?channel_id=${id}`;
-    const res = await fetch(PROXY + encodeURIComponent(url));
-    const data = await res.json();
-    if (data.status !== 'ok') {
-      showToast('Could not load channel — check the ID and try again');
-      return;
-    }
-    const feedTitle = data.feed.title;
-    const feedAvatar = data.feed.image || null;
-    const idx = channels.findIndex(c => c.id === id);
-    if (idx !== -1) { channels[idx].name = feedTitle || id; save(); }
-
-    const videos = (data.items || []).map(item => ({
-      channelId: id,
-      channelName: feedTitle || id,
-      channelAvatar: feedAvatar,
-      title: item.title,
-      link: item.link,
-      videoId: (item.link.match(/v=([^&]+)/) || [])[1] || '',
-      published: new Date(item.pubDate),
-      thumbnail: item.thumbnail || '',
-    })).filter(v => {
-      if (v.link && v.link.includes('/shorts/')) return false;
-      if (v.title && /#shorts?\b/i.test(v.title)) return false;
-      return true;
-    });
-
-    allVideos = allVideos.filter(v => v.channelId !== id);
-    allVideos.push(...videos);
-    allVideos.sort((a, b) => b.published - a.published);
-    renderChips();
-    renderFeed();
-    showToast(`✓ Added ${feedTitle || id}`);
-  } catch(e) {
-    showToast('Failed to load channel — check your connection');
-  }
 }
 
-// ── MANAGE SHEET ──────────────────────────────────────────────────────────────
-function openSheet() {
-  renderSheet();
-  document.getElementById('sheetOverlay').classList.add('open');
-}
+function renderFeed() {
+  var el  = document.getElementById('feed');
+  var vis = filter ? videos.filter(function(v){ return v.channelId === filter; }) : videos;
 
-function closeSheet() {
-  document.getElementById('sheetOverlay').classList.remove('open');
-}
-
-function handleSheetClick(e) {
-  if (e.target === document.getElementById('sheetOverlay')) closeSheet();
-}
-
-function renderSheet() {
-  const el = document.getElementById('sheetList');
   if (channels.length === 0) {
-    el.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:12px 0">No channels added yet.</p>';
+    el.innerHTML = '<div class="state"><div class="state-icon">📺</div><div class="state-title">No channels yet</div><div class="state-body">Paste a YouTube Channel ID above and tap Add.</div></div>';
     return;
   }
-  el.innerHTML = channels.map(ch => `
-    <div class="sheet-channel">
-      <div class="sheet-avatar">${ch.name[0].toUpperCase()}</div>
-      <div class="sheet-name">${esc(ch.name || ch.id)}</div>
-      <button class="remove-btn" onclick="removeChannel('${ch.id}')">Remove</button>
-    </div>
-  `).join('');
+  if (vis.length === 0) {
+    el.innerHTML = '<div class="state"><div class="spinner"></div><div class="state-title" style="margin-top:10px">Loading videos…</div></div>';
+    return;
+  }
+
+  var now = Date.now();
+  el.innerHTML = vis.map(function(v) {
+    var isNew = (now - v.pub) < 48*3600*1000;
+    return '<a class="video-card" href="' + v.link + '" target="_blank" rel="noopener">' +
+      '<div class="thumb"><img src="' + v.thumb + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+      (isNew ? '<div class="new-badge">NEW</div>' : '') + '</div>' +
+      '<div class="card-body">' +
+        '<div class="card-meta">' +
+          '<div class="card-ch">' + esc(v.channelName) + '</div>' +
+          '<div class="card-time">' + ago(v.pub) + '</div>' +
+        '</div>' +
+        '<div class="card-title">' + esc(v.title) + '</div>' +
+      '</div></a>';
+  }).join('');
 }
 
+// ── SHEET ─────────────────────────────────────────────────────────────────────
+function openSheet() {
+  var el = document.getElementById('sheetList');
+  if (channels.length === 0) {
+    el.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:8px 0">No channels added yet.</p>';
+  } else {
+    el.innerHTML = channels.map(function(ch) {
+      return '<div class="sheet-row">' +
+        '<div><div class="sheet-name">' + esc(ch.name||ch.id) + '</div><div class="sheet-id">' + ch.id + '</div></div>' +
+        '<button class="del-btn" onclick="removeChannel(\'' + ch.id + '\')">Remove</button>' +
+        '</div>';
+    }).join('');
+  }
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeSheet() { document.getElementById('overlay').classList.remove('open'); }
+
 function removeChannel(id) {
-  channels = channels.filter(c => c.id !== id);
-  save();
-  allVideos = allVideos.filter(v => v.channelId !== id);
-  if (activeFilter === id) activeFilter = null;
-  renderSheet();
+  channels = channels.filter(function(c){ return c.id !== id; });
+  saveChannels(channels);
+  videos = videos.filter(function(v){ return v.channelId !== id; });
+  if (filter === id) filter = null;
+  openSheet();
   renderChips();
   renderFeed();
 }
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
-function timeAgo(date) {
-  const diff = Date.now() - date.getTime();
-  const m = Math.floor(diff / 60000);
-  const h = Math.floor(m / 60);
-  const d = Math.floor(h / 24);
-  const w = Math.floor(d / 7);
-  const mo = Math.floor(d / 30);
-  if (m < 60) return `${m}m ago`;
-  if (h < 24) return `${h}h ago`;
-  if (d < 7) return `${d}d ago`;
-  if (w < 5) return `${w}w ago`;
-  if (mo < 12) return `${mo}mo ago`;
-  return date.toLocaleDateString();
+function ago(date) {
+  var s = Math.floor((Date.now() - date) / 1000);
+  if (s < 3600)  return Math.floor(s/60) + 'm ago';
+  if (s < 86400) return Math.floor(s/3600) + 'h ago';
+  var d = Math.floor(s/86400);
+  if (d < 7)   return d + 'd ago';
+  if (d < 31)  return Math.floor(d/7) + 'w ago';
+  if (d < 365) return Math.floor(d/30) + 'mo ago';
+  return new Date(date).toLocaleDateString();
 }
 
 function esc(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 3000);
+function toast(msg) {
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  clearTimeout(el._t);
+  el._t = setTimeout(function(){ el.classList.remove('show'); }, 3000);
 }
 
-document.getElementById('channelInput').addEventListener('keydown', e => {
+document.getElementById('channelInput').addEventListener('keydown', function(e) {
   if (e.key === 'Enter') addChannel();
 });
-
-// ── INIT ──────────────────────────────────────────────────────────────────────
-renderChips();
-renderFeed();
-refreshAll();
 </script>
 
 </body>

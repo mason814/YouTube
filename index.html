@@ -13,8 +13,9 @@
     --safe-top: env(safe-area-inset-top, 0px); --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; }
+  body { background: var(--bg); color: var(--text); font-family: 'DM Sans', sans-serif; min-height: 100vh; overflow-x: hidden; }
 
+/* ── HEADER ── */
 .header {
 position: sticky; top: 0; z-index: 50;
 background: rgba(12,12,12,0.97);
@@ -27,7 +28,6 @@ padding-top: var(–safe-top);
 .logo { font-family: ‘Syne’, sans-serif; font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
 .logo span { color: var(–accent); }
 .header-btns { display: flex; gap: 8px; }
-
 .icon-btn {
 background: var(–card); border: 1px solid var(–border); color: var(–muted);
 width: 36px; height: 36px; border-radius: 50%;
@@ -40,7 +40,6 @@ background: var(–card); border: 1px solid var(–border); color: var(–muted)
 height: 36px; padding: 0 14px; border-radius: 20px;
 font-size: 13px; font-family: ‘DM Sans’, sans-serif; cursor: pointer;
 }
-
 .add-bar { display: flex; gap: 8px; margin-bottom: 12px; }
 .add-bar input {
 flex: 1; min-width: 0;
@@ -55,7 +54,6 @@ font-family: ‘Syne’, sans-serif; font-weight: 700; font-size: 14px;
 padding: 0 18px; cursor: pointer; flex-shrink: 0;
 }
 .add-btn:active { opacity: 0.8; }
-
 .chips { display: flex; gap: 8px; overflow-x: auto; padding: 0 16px 12px; scrollbar-width: none; -webkit-overflow-scrolling: touch; }
 .chips::-webkit-scrollbar { display: none; }
 .chip {
@@ -68,11 +66,11 @@ cursor: pointer; flex-shrink: 0; color: var(–text);
 .chip-all { background: var(–accent); border-color: var(–accent); color: white; padding: 5px 14px; font-weight: 600; }
 .chip-all.active { background: var(–accent); }
 
+/* ── FEED ── */
 .feed { padding: 12px 12px calc(24px + var(–safe-bottom)); display: flex; flex-direction: column; gap: 12px; }
-
 .video-card {
 background: var(–card); border: 1px solid var(–border); border-radius: 16px;
-overflow: hidden; text-decoration: none; color: inherit; display: block;
+overflow: hidden; text-decoration: none; color: inherit; display: block; cursor: pointer;
 }
 .video-card:active { opacity: 0.8; }
 .thumb { width: 100%; aspect-ratio: 16/9; background: #1a1a1a; position: relative; overflow: hidden; }
@@ -83,12 +81,23 @@ background: var(–accent); color: white;
 font-size: 10px; font-weight: 700; font-family: ‘Syne’, sans-serif;
 padding: 2px 8px; border-radius: 6px;
 }
+.play-icon {
+position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+opacity: 0; transition: opacity 0.2s;
+}
+.video-card:hover .play-icon { opacity: 1; }
+.play-circle {
+width: 52px; height: 52px; border-radius: 50%;
+background: rgba(0,0,0,0.7); display: flex; align-items: center; justify-content: center;
+border: 2px solid rgba(255,255,255,0.4);
+}
 .card-body { padding: 11px 14px 13px; }
 .card-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
 .card-ch { font-size: 12px; color: var(–muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-time { font-size: 12px; color: var(–muted2); flex-shrink: 0; }
 .card-title { font-size: 15px; font-weight: 500; line-height: 1.4; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
+/* ── STATES ── */
 .state { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 64px 32px; text-align: center; gap: 10px; }
 .state-icon { font-size: 44px; opacity: 0.25; }
 .state-title { font-family: ‘Syne’, sans-serif; font-size: 18px; font-weight: 700; color: var(–muted); }
@@ -96,6 +105,7 @@ padding: 2px 8px; border-radius: 6px;
 .spinner { width: 30px; height: 30px; border: 2px solid var(–border); border-top-color: var(–accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* ── CHANNEL SHEET ── */
 .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 100; align-items: flex-end; }
 .overlay.open { display: flex; }
 .sheet { background: #1c1c1c; border-radius: 20px 20px 0 0; padding: 16px 16px calc(24px + var(–safe-bottom)); width: 100%; max-height: 75vh; overflow-y: auto; }
@@ -106,12 +116,79 @@ padding: 2px 8px; border-radius: 6px;
 .sheet-id { font-size: 11px; color: var(–muted); font-family: monospace; }
 .del-btn { background: #2a1010; border: none; color: #ff6644; font-size: 12px; font-family: ‘DM Sans’, sans-serif; padding: 6px 12px; border-radius: 8px; cursor: pointer; flex-shrink: 0; }
 
+/* ── PLAYER ── */
+.player-wrap {
+display: none; position: fixed; inset: 0; z-index: 200;
+background: #000; flex-direction: column; touch-action: none;
+}
+.player-wrap.open { display: flex; }
+
+.player-header {
+position: absolute; top: 0; left: 0; right: 0;
+padding: calc(var(–safe-top) + 14px) 16px 14px;
+display: flex; align-items: center; justify-content: space-between;
+z-index: 10;
+background: linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, transparent 100%);
+}
+.player-close {
+background: rgba(0,0,0,0.5); border: none; color: white;
+width: 36px; height: 36px; border-radius: 50%;
+display: flex; align-items: center; justify-content: center; cursor: pointer;
+font-size: 20px;
+}
+.player-counter {
+font-size: 13px; color: rgba(255,255,255,0.7);
+font-family: ‘Syne’, sans-serif; font-weight: 700;
+}
+.player-yt-btn {
+background: rgba(0,0,0,0.5); border: 1px solid rgba(255,255,255,0.2);
+color: white; font-size: 12px; font-family: ‘DM Sans’, sans-serif;
+padding: 6px 12px; border-radius: 20px; cursor: pointer; text-decoration: none;
+display: flex; align-items: center; gap: 5px;
+}
+
+.player-slide {
+position: absolute; inset: 0;
+display: flex; flex-direction: column;
+transition: transform 0.35s cubic-bezier(0.4,0,0.2,1);
+}
+
+.player-video {
+width: 100%; aspect-ratio: 16/9;
+position: absolute; top: 50%; left: 0; right: 0;
+transform: translateY(-55%);
+background: #000;
+}
+.player-video iframe {
+width: 100%; height: 100%; border: none; display: block;
+}
+
+.player-info {
+position: absolute; bottom: 0; left: 0; right: 0;
+padding: 20px 20px calc(var(–safe-bottom) + 60px);
+background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%);
+}
+.player-channel { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
+.player-title { font-size: 17px; font-weight: 600; line-height: 1.35; color: white; margin-bottom: 8px; }
+.player-date { font-size: 12px; color: rgba(255,255,255,0.4); }
+
+.swipe-hint {
+position: absolute; bottom: calc(var(–safe-bottom) + 16px); left: 50%;
+transform: translateX(-50%);
+display: flex; flex-direction: column; align-items: center; gap: 4px;
+opacity: 0.5; pointer-events: none;
+animation: hintFade 2s ease 1.5s both;
+}
+@keyframes hintFade { 0%{opacity:0.5} 70%{opacity:0.5} 100%{opacity:0} }
+.swipe-hint span { font-size: 11px; color: white; letter-spacing: 0.05em; }
+
+/* TOAST */
 .toast {
 position: fixed; bottom: calc(24px + var(–safe-bottom)); left: 50%;
 transform: translateX(-50%) translateY(60px);
 background: #1e1e1e; border: 1px solid var(–border); color: var(–text);
 font-size: 13px; padding: 10px 20px; border-radius: 20px;
-white-space: nowrap; z-index: 200; transition: transform 0.25s; pointer-events: none;
+white-space: nowrap; z-index: 300; transition: transform 0.25s; pointer-events: none;
 }
 .toast.show { transform: translateX(-50%) translateY(0); }
 </style>
@@ -143,6 +220,8 @@ white-space: nowrap; z-index: 200; transition: transform 0.25s; pointer-events: 
 
 <div class="feed" id="feed"></div>
 
+<!-- CHANNEL SHEET -->
+
 <div class="overlay" id="overlay" onclick="if(event.target===this)closeSheet()">
   <div class="sheet">
     <div class="sheet-handle"></div>
@@ -151,33 +230,59 @@ white-space: nowrap; z-index: 200; transition: transform 0.25s; pointer-events: 
   </div>
 </div>
 
+<!-- FULL SCREEN PLAYER -->
+
+<div class="player-wrap" id="playerWrap">
+  <div class="player-header">
+    <button class="player-close" onclick="closePlayer()">✕</button>
+    <div class="player-counter" id="playerCounter"></div>
+    <a class="player-yt-btn" id="playerYtBtn" target="_blank" rel="noopener">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-2.75 12.64 12.64 0 0 0-8.07 2.82 12.64 12.64 0 0 0-4.14 7.07 4.72 4.72 0 0 1 3.08-1.12 4.83 4.83 0 0 1 4.83 4.83 4.83 4.83 0 0 1-4.83 4.83A4.83 4.83 0 0 1 2 17.54v-.14A14.63 14.63 0 0 1 7.55 4.27 14.63 14.63 0 0 1 19.7 2a1 1 0 0 1 .89 1.45 4.83 4.83 0 0 1-1 3.24z"/></svg>
+      YouTube
+    </a>
+  </div>
+
+  <div class="player-slide" id="playerSlide">
+    <div class="player-video" id="playerVideo"></div>
+    <div class="player-info">
+      <div class="player-channel" id="playerChannel"></div>
+      <div class="player-title" id="playerTitle"></div>
+      <div class="player-date" id="playerDate"></div>
+    </div>
+  </div>
+
+  <div class="swipe-hint" id="swipeHint">
+    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
+    <span>SWIPE UP FOR NEXT</span>
+  </div>
+</div>
+
 <div class="toast" id="toast"></div>
 
 <script>
 // ── STORAGE ──────────────────────────────────────────────────────────────────
 function saveChannels(chs) {
-  const s = JSON.stringify(chs);
+  var s = JSON.stringify(chs);
   try { localStorage.setItem('yf_ch', s); } catch(e) {}
   try {
-    const exp = new Date(Date.now() + 365*864e5).toUTCString();
+    var exp = new Date(Date.now() + 365*864e5).toUTCString();
     document.cookie = 'yf_ch=' + encodeURIComponent(s) + ';expires=' + exp + ';path=/;SameSite=Lax';
   } catch(e) {}
 }
-
 function loadChannels() {
-  try { const v = localStorage.getItem('yf_ch'); if (v) return JSON.parse(v); } catch(e) {}
+  try { var v = localStorage.getItem('yf_ch'); if (v) return JSON.parse(v); } catch(e) {}
   try {
-    const m = document.cookie.match(/(?:^|;\s*)yf_ch=([^;]*)/);
+    var m = document.cookie.match(/(?:^|;\s*)yf_ch=([^;]*)/);
     if (m) return JSON.parse(decodeURIComponent(m[1]));
   } catch(e) {}
   return null;
 }
 
 // ── STATE ────────────────────────────────────────────────────────────────────
-let channels = loadChannels() || [];
-let videos   = [];
-let filter   = null;
-let loading  = false;
+var channels = loadChannels() || [];
+var videos   = [];
+var filter   = null;
+var loading  = false;
 
 // ── BOOT ─────────────────────────────────────────────────────────────────────
 renderChips();
@@ -187,16 +292,12 @@ if (channels.length > 0) fetchAll();
 // ── FETCH ────────────────────────────────────────────────────────────────────
 async function fetchOne(ch) {
   var feedUrl = 'https://www.youtube.com/feeds/videos.xml?channel_id=' + ch.id;
-
-  // Try multiple proxies — all parse raw XML so no JSON API dependency
   var proxies = [
     'https://corsproxy.io/?' + encodeURIComponent(feedUrl),
     'https://api.allorigins.win/raw?url=' + encodeURIComponent(feedUrl),
     'https://thingproxy.freeboard.io/fetch/' + feedUrl,
   ];
-
   var xml = null;
-
   for (var i = 0; i < proxies.length; i++) {
     try {
       var res = await fetch(proxies[i]);
@@ -205,47 +306,34 @@ async function fetchOne(ch) {
       if (text && text.indexOf('<entry>') !== -1) { xml = text; break; }
     } catch(e) { console.warn('proxy ' + i + ' failed:', e.message); }
   }
+  if (!xml) return false;
 
-  if (!xml) {
-    console.warn('All proxies failed for', ch.id);
-    return false;
-  }
-
-  // Parse the raw XML
   var parser  = new DOMParser();
   var xmlDoc  = parser.parseFromString(xml, 'text/xml');
   var entries = xmlDoc.querySelectorAll('entry');
-
-  if (!entries.length) { console.warn('No entries in feed for', ch.id); return false; }
+  if (!entries.length) return false;
 
   var chanName = '';
   var authorEl = xmlDoc.querySelector('author name');
   if (authorEl) chanName = authorEl.textContent;
-  if (!chanName) {
-    var titleEl = xmlDoc.querySelector('feed > title');
-    if (titleEl) chanName = titleEl.textContent;
-  }
+  if (!chanName) { var titleEl = xmlDoc.querySelector('feed > title'); if (titleEl) chanName = titleEl.textContent; }
   if (!chanName) chanName = ch.name || ch.id;
 
-  // Update stored name
   var idx = channels.findIndex(function(c) { return c.id === ch.id; });
   if (idx !== -1) { channels[idx].name = chanName; saveChannels(channels); }
 
   var normalized = Array.from(entries).map(function(e) {
     var videoId = '';
-    var vidEl = e.getElementsByTagNameNS('http://www.youtube.com/xml/schemas/2015', 'videoId')[0];
-    if (vidEl) videoId = vidEl.textContent;
+    var nsEls = e.getElementsByTagName('yt:videoId');
+    if (nsEls.length) videoId = nsEls[0].textContent;
     if (!videoId) {
       var linkEl = e.querySelector('link[rel="alternate"]');
-      if (linkEl) {
-        var href = linkEl.getAttribute('href') || '';
-        videoId = (href.match(/[?&]v=([^&]+)/) || [])[1] || '';
-      }
+      if (linkEl) { var href = linkEl.getAttribute('href') || ''; videoId = (href.match(/[?&]v=([^&]+)/) || [])[1] || ''; }
     }
-    var titleEl   = e.querySelector('title');
-    var pubEl     = e.querySelector('published');
-    var title     = titleEl ? titleEl.textContent : '';
-    var pubDate   = pubEl   ? pubEl.textContent   : '';
+    var titleEl = e.querySelector('title');
+    var pubEl   = e.querySelector('published');
+    var title   = titleEl ? titleEl.textContent : '';
+    var pubDate = pubEl   ? pubEl.textContent   : '';
     return {
       channelId:   ch.id,
       channelName: chanName,
@@ -258,12 +346,11 @@ async function fetchOne(ch) {
   }).filter(function(v) {
     if (!v.videoId) return false;
     if (v.link.indexOf('/shorts/') !== -1) return false;
-    if (/#shorts?/i.test(v.title)) return false;
+    if (/#shorts?\b/i.test(v.title)) return false;
     return true;
   });
 
   if (!normalized.length) return false;
-
   videos = videos.filter(function(v) { return v.channelId !== ch.id; }).concat(normalized);
   videos.sort(function(a,b) { return b.pub - a.pub; });
   return true;
@@ -271,77 +358,45 @@ async function fetchOne(ch) {
 
 async function fetchAll() {
   if (loading) return;
-  loading = true;
-  spin(true);
-  videos = [];
-  renderFeed();
+  loading = true; spin(true); videos = []; renderFeed();
   await Promise.all(channels.map(fetchOne));
-  loading = false;
-  spin(false);
-  renderChips();
-  renderFeed();
+  loading = false; spin(false); renderChips(); renderFeed();
 }
 
 async function fetchAndAdd(ch) {
   spin(true);
   var ok = await fetchOne(ch);
-  spin(false);
-  renderChips();
-  renderFeed();
-  if (ok) {
-    var name = (channels.find(function(c){ return c.id === ch.id; }) || {}).name || ch.id;
-    toast('Added ' + name);
-  } else {
+  spin(false); renderChips(); renderFeed();
+  if (ok) { toast('Added ' + (channels.find(function(c){ return c.id===ch.id; })||{}).name || ch.id); }
+  else {
     toast('Could not load — check the Channel ID');
     channels = channels.filter(function(c){ return c.id !== ch.id; });
-    saveChannels(channels);
-    renderChips();
-    renderFeed();
+    saveChannels(channels); renderChips(); renderFeed();
   }
 }
 
-function spin(on) {
-  document.getElementById('refreshBtn').classList.toggle('spinning', on);
-}
-
-function refreshAll() {
-  if (channels.length === 0) { toast('Add a channel first!'); return; }
-  fetchAll();
-}
+function spin(on) { document.getElementById('refreshBtn').classList.toggle('spinning', on); }
+function refreshAll() { if (!channels.length) { toast('Add a channel first!'); return; } fetchAll(); }
 
 // ── ADD CHANNEL ───────────────────────────────────────────────────────────────
 async function addChannel() {
   var input = document.getElementById('channelInput');
   var raw   = (input.value || '').trim().replace(/\s+/g, '');
   if (!raw) { input.focus(); return; }
-
-  // Extract UC id from anywhere in the string (handles full URLs too)
-  var m  = raw.match(/UC[a-zA-Z0-9_-]{10,}/);
+  var m = raw.match(/UC[a-zA-Z0-9_-]{10,}/);
   var id = m ? m[0] : raw;
-
-  if (!id.startsWith('UC') || id.length < 12) {
-    toast('Paste a Channel ID starting with UC…');
-    return;
-  }
-  if (channels.find(function(c){ return c.id === id; })) {
-    toast('Already in your feed!');
-    return;
-  }
-
-  input.value = '';
-  input.blur();
-
+  if (!id.startsWith('UC') || id.length < 12) { toast('Paste a Channel ID starting with UC…'); return; }
+  if (channels.find(function(c){ return c.id === id; })) { toast('Already in your feed!'); return; }
+  input.value = ''; input.blur();
   var ch = { id: id, name: id };
-  channels.push(ch);
-  saveChannels(channels);
-  renderChips();
+  channels.push(ch); saveChannels(channels); renderChips();
   await fetchAndAdd(ch);
 }
 
-// ── RENDER ───────────────────────────────────────────────────────────────────
+// ── RENDER FEED ───────────────────────────────────────────────────────────────
 function renderChips() {
   var el = document.getElementById('chips');
-  if (channels.length === 0) { el.innerHTML = ''; return; }
+  if (!channels.length) { el.innerHTML = ''; return; }
   el.innerHTML =
     '<div class="chip chip-all' + (filter===null?' active':'') + '" onclick="setFilter(null)">All</div>' +
     channels.map(function(ch) {
@@ -349,50 +404,151 @@ function renderChips() {
     }).join('');
 }
 
-function setFilter(id) {
-  filter = id;
-  renderChips();
-  renderFeed();
+function setFilter(id) { filter = id; renderChips(); renderFeed(); }
+
+function getVisible() {
+  return filter ? videos.filter(function(v){ return v.channelId === filter; }) : videos;
 }
 
 function renderFeed() {
   var el  = document.getElementById('feed');
-  var vis = filter ? videos.filter(function(v){ return v.channelId === filter; }) : videos;
-
-  if (channels.length === 0) {
+  var vis = getVisible();
+  if (!channels.length) {
     el.innerHTML = '<div class="state"><div class="state-icon">📺</div><div class="state-title">No channels yet</div><div class="state-body">Paste a YouTube Channel ID above and tap Add.</div></div>';
     return;
   }
-  if (vis.length === 0) {
-    // Only show spinner if actively loading, otherwise show a helpful message
-    if (loading) {
-      el.innerHTML = '<div class="state"><div class="spinner"></div><div class="state-title" style="margin-top:10px">Loading videos…</div></div>';
-    } else {
-      el.innerHTML = '<div class="state"><div class="state-icon">⚠️</div><div class="state-title">No videos loaded</div><div class="state-body">Check your Channel ID is correct, then tap the refresh button to try again.</div></div>';
-    }
+  if (!vis.length) {
+    el.innerHTML = loading
+      ? '<div class="state"><div class="spinner"></div><div class="state-title" style="margin-top:10px">Loading videos…</div></div>'
+      : '<div class="state"><div class="state-icon">⚠️</div><div class="state-title">No videos loaded</div><div class="state-body">Check your Channel ID, then tap refresh.</div></div>';
     return;
   }
-
   var now = Date.now();
-  el.innerHTML = vis.map(function(v) {
+  el.innerHTML = vis.map(function(v, i) {
     var isNew = (now - v.pub) < 48*3600*1000;
-    return '<a class="video-card" href="' + v.link + '" target="_blank" rel="noopener">' +
-      '<div class="thumb"><img src="' + v.thumb + '" loading="lazy" onerror="this.style.display=\'none\'">' +
-      (isNew ? '<div class="new-badge">NEW</div>' : '') + '</div>' +
+    return '<div class="video-card" onclick="openPlayer(' + i + ')">' +
+      '<div class="thumb">' +
+        '<img src="' + v.thumb + '" loading="lazy" onerror="this.style.display=\'none\'">' +
+        (isNew ? '<div class="new-badge">NEW</div>' : '') +
+        '<div class="play-icon"><div class="play-circle"><svg width="18" height="18" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg></div></div>' +
+      '</div>' +
       '<div class="card-body">' +
-        '<div class="card-meta">' +
-          '<div class="card-ch">' + esc(v.channelName) + '</div>' +
-          '<div class="card-time">' + ago(v.pub) + '</div>' +
-        '</div>' +
+        '<div class="card-meta"><div class="card-ch">' + esc(v.channelName) + '</div><div class="card-time">' + ago(v.pub) + '</div></div>' +
         '<div class="card-title">' + esc(v.title) + '</div>' +
-      '</div></a>';
+      '</div></div>';
   }).join('');
 }
 
-// ── SHEET ─────────────────────────────────────────────────────────────────────
+// ── PLAYER ────────────────────────────────────────────────────────────────────
+var playerIdx = 0;
+var touchStartY = 0;
+var touchStartX = 0;
+var dragging = false;
+var dragY = 0;
+
+function openPlayer(idx) {
+  playerIdx = idx;
+  document.getElementById('playerWrap').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  loadPlayerVideo(playerIdx);
+  document.getElementById('swipeHint').style.animation = 'none';
+  setTimeout(function(){ document.getElementById('swipeHint').style.animation = ''; }, 10);
+}
+
+function closePlayer() {
+  document.getElementById('playerWrap').classList.remove('open');
+  document.body.style.overflow = '';
+  document.getElementById('playerVideo').innerHTML = '';
+}
+
+function loadPlayerVideo(idx) {
+  var vis = getVisible();
+  if (idx < 0 || idx >= vis.length) return;
+  var v = vis[idx];
+
+  document.getElementById('playerCounter').textContent = (idx + 1) + ' / ' + vis.length;
+  document.getElementById('playerChannel').textContent = v.channelName;
+  document.getElementById('playerTitle').textContent   = v.title;
+  document.getElementById('playerDate').textContent    = ago(v.pub);
+  document.getElementById('playerYtBtn').href          = v.link;
+
+  // Embed with autoplay
+  document.getElementById('playerVideo').innerHTML =
+    '<iframe src="https://www.youtube.com/embed/' + v.videoId +
+    '?autoplay=1&playsinline=1&rel=0&modestbranding=1" ' +
+    'allow="autoplay; fullscreen" allowfullscreen></iframe>';
+}
+
+function playerNext() {
+  var vis = getVisible();
+  if (playerIdx < vis.length - 1) { playerIdx++; animateSlide('up'); }
+  else { toast('Last video!'); }
+}
+
+function playerPrev() {
+  if (playerIdx > 0) { playerIdx--; animateSlide('down'); }
+  else { toast('First video!'); }
+}
+
+function animateSlide(dir) {
+  var slide = document.getElementById('playerSlide');
+  var out = dir === 'up' ? '-100%' : '100%';
+  var in_ = dir === 'up' ? '100%'  : '-100%';
+  slide.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+  slide.style.transform  = 'translateY(' + out + ')';
+  document.getElementById('playerVideo').innerHTML = '';
+  setTimeout(function() {
+    slide.style.transition = 'none';
+    slide.style.transform  = 'translateY(' + in_ + ')';
+    loadPlayerVideo(playerIdx);
+    requestAnimationFrame(function() {
+      requestAnimationFrame(function() {
+        slide.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+        slide.style.transform  = 'translateY(0)';
+      });
+    });
+  }, 300);
+}
+
+// Touch swipe handling
+var pw = document.getElementById('playerWrap');
+
+pw.addEventListener('touchstart', function(e) {
+  touchStartY = e.touches[0].clientY;
+  touchStartX = e.touches[0].clientX;
+  dragging = true; dragY = 0;
+}, { passive: true });
+
+pw.addEventListener('touchmove', function(e) {
+  if (!dragging) return;
+  dragY = e.touches[0].clientY - touchStartY;
+  var slide = document.getElementById('playerSlide');
+  slide.style.transition = 'none';
+  slide.style.transform = 'translateY(' + (dragY * 0.4) + 'px)';
+}, { passive: true });
+
+pw.addEventListener('touchend', function(e) {
+  if (!dragging) return;
+  dragging = false;
+  var slide = document.getElementById('playerSlide');
+  slide.style.transition = 'transform 0.3s cubic-bezier(0.4,0,0.2,1)';
+  slide.style.transform = 'translateY(0)';
+  if (dragY < -60) playerNext();
+  else if (dragY > 60) playerPrev();
+});
+
+// Keyboard support
+document.addEventListener('keydown', function(e) {
+  if (!document.getElementById('playerWrap').classList.contains('open')) return;
+  if (e.key === 'ArrowUp' || e.key === 'ArrowRight') playerNext();
+  if (e.key === 'ArrowDown' || e.key === 'ArrowLeft') playerPrev();
+  if (e.key === 'Escape') closePlayer();
+});
+
+// ── CHANNEL SHEET ─────────────────────────────────────────────────────────────
 function openSheet() {
   var el = document.getElementById('sheetList');
-  if (channels.length === 0) {
+  if (!channels.length) {
     el.innerHTML = '<p style="color:var(--muted);font-size:14px;padding:8px 0">No channels added yet.</p>';
   } else {
     el.innerHTML = channels.map(function(ch) {
@@ -412,9 +568,7 @@ function removeChannel(id) {
   saveChannels(channels);
   videos = videos.filter(function(v){ return v.channelId !== id; });
   if (filter === id) filter = null;
-  openSheet();
-  renderChips();
-  renderFeed();
+  openSheet(); renderChips(); renderFeed();
 }
 
 // ── UTILS ─────────────────────────────────────────────────────────────────────
@@ -423,16 +577,14 @@ function ago(date) {
   if (s < 3600)  return Math.floor(s/60) + 'm ago';
   if (s < 86400) return Math.floor(s/3600) + 'h ago';
   var d = Math.floor(s/86400);
-  if (d < 7)   return d + 'd ago';
-  if (d < 31)  return Math.floor(d/7) + 'w ago';
+  if (d < 7) return d + 'd ago';
+  if (d < 31) return Math.floor(d/7) + 'w ago';
   if (d < 365) return Math.floor(d/30) + 'mo ago';
   return new Date(date).toLocaleDateString();
 }
-
 function esc(s) {
   return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
-
 function toast(msg) {
   var el = document.getElementById('toast');
   el.textContent = msg;

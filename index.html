@@ -38,14 +38,6 @@ background: var(–card); border: 1px solid var(–border); color: var(–muted)
 height: 36px; padding: 0 14px; border-radius: 20px;
 font-size: 13px; font-family: ‘DM Sans’, sans-serif; cursor: pointer;
 }
-.remix-btn {
-background: linear-gradient(135deg, #ff4400, #ffaa00);
-border: none; color: white; height: 36px; padding: 0 14px; border-radius: 20px;
-font-size: 13px; font-weight: 700; font-family: ‘Syne’, sans-serif; cursor: pointer;
-display: flex; align-items: center; gap: 5px; transition: opacity 0.15s;
-}
-.remix-btn:active { opacity: 0.8; transform: scale(0.96); }
-.remix-btn.on { background: linear-gradient(135deg, #ffaa00, #ff4400); box-shadow: 0 0 12px rgba(255,100,0,0.4); }
 .add-bar { display: flex; gap: 8px; margin-bottom: 12px; }
 .add-bar input {
 flex: 1; min-width: 0; background: var(–card); border: 1px solid var(–border); border-radius: 12px;
@@ -200,13 +192,7 @@ white-space: nowrap; z-index: 300; transition: transform 0.25s; pointer-events: 
     <div class="header-top">
       <div class="logo">Your<span>Feed</span></div>
       <div class="header-btns">
-        <button class="remix-btn" id="remixBtn" onclick="toggleRemix()">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-            <path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/>
-          </svg>
-          Remix
-        </button>
-        <button class="text-btn" onclick="openSheet()">Channels</button>
+<button class="text-btn" onclick="openSheet()">Channels</button>
         <button class="icon-btn" id="refreshBtn" onclick="refreshAll()">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="M23 4v6h-6M1 20v-6h6"/>
@@ -282,29 +268,6 @@ var channels = loadChannels() || [];
 var videos   = [];
 var filter   = null;
 var loading  = false;
-var remixOn  = false;
-
-function shuffle(arr) {
-  var a = arr.slice();
-  for (var i = a.length - 1; i > 0; i--) {
-    var j = Math.floor(Math.random() * (i + 1));
-    var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
-  }
-  return a;
-}
-
-function toggleRemix() {
-  remixOn = !remixOn;
-  var btn = document.getElementById('remixBtn');
-  if (remixOn) {
-    btn.classList.add('on');
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg> Remixed';
-  } else {
-    btn.classList.remove('on');
-    btn.innerHTML = '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M16 3h5v5M4 20L21 3M21 16v5h-5M15 15l6 6M4 4l5 5"/></svg> Remix';
-  }
-  renderFeed();
-}
 
 // ── BOOT ──────────────────────────────────────────────────────────────────────
 renderChips(); renderFeed();
@@ -367,6 +330,16 @@ async function fetchOne(ch) {
       '&type=video&order=date&maxResults=25&key=' + API_KEY;
     var sRes  = await fetch(searchUrl);
     var sData = await sRes.json();
+    if (sData.error) {
+      var reason = sData.error.errors && sData.error.errors[0] && sData.error.errors[0].reason;
+      if (reason === 'quotaExceeded') {
+        toast('⚠️ YouTube API daily limit reached — resets at midnight Pacific time');
+      } else {
+        toast('API error: ' + (sData.error.message || 'unknown'));
+      }
+      console.warn('API error', sData.error);
+      return false;
+    }
     if (!sData.items || !sData.items.length) return false;
 
     var ids = sData.items.map(function(i){ return i.id.videoId; }).join(',');
@@ -471,8 +444,7 @@ function renderChips() {
 function setFilter(id) { filter = id; renderChips(); renderFeed(); }
 
 function getVisible() {
-  var base = filter ? videos.filter(function(v){ return v.channelId === filter; }) : videos;
-  return remixOn ? shuffle(base) : base;
+  return filter ? videos.filter(function(v){ return v.channelId === filter; }) : videos;
 }
 
 function renderFeed() {

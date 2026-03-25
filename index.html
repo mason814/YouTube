@@ -1,3 +1,5 @@
+<!-- v=20240324 -->
+
 <!DOCTYPE html>
 
 <html lang="en">
@@ -415,24 +417,17 @@ function spin(on) { document.getElementById('refreshBtn').classList.toggle('spin
 function refreshAll() { if (!channels.length) { toast('Add a channel first!'); return; } fetchAll(); }
 
 // ── ADD CHANNEL ───────────────────────────────────────────────────────────────
-async function addChannel() {
+function addChannel() {
   var input = document.getElementById('channelInput');
-  var raw   = (input.value || '').trim().replace(/\s+/g, '');
+  var raw   = (input.value || '').trim();
   if (!raw) { input.focus(); return; }
 
-  // Extract UC id from anywhere — handles full URLs, @handles, or raw UC codes
-  var ucMatch = raw.match(/UC[a-zA-Z0-9_-]{10,}/);
+  // Pull UC id out of whatever was pasted
+  var ucMatch = raw.replace(/\s+/g,'').match(/UC[a-zA-Z0-9_-]{10,}/);
   var id = ucMatch ? ucMatch[0] : null;
 
-  // If no UC id found, try API lookup
   if (!id) {
-    toast('Looking up channel…');
-    try { id = await resolveChannelId(raw); } catch(e) { id = null; }
-  }
-
-  if (!id) {
-    toast('Paste the UC code instead (starts with UC…)');
-    input.value = raw; // restore so they can try again
+    toast('Please paste a UC code — starts with UC…');
     return;
   }
 
@@ -442,16 +437,18 @@ async function addChannel() {
     return;
   }
 
+  // Add channel immediately
   input.value = '';
   input.blur();
-
-  var ch = { id: id, name: raw.replace(/^@/,'').replace(/.*channel\//,'') };
+  var ch = { id: id, name: id };
   channels.push(ch);
   saveChannels(channels);
   renderChips();
   renderFeed();
-  toast('Loading videos…');
-  await fetchAndAdd(ch);
+  toast('Adding channel…');
+
+  // Fetch videos in background
+  fetchAndAdd(ch);
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────────

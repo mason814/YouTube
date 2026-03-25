@@ -146,10 +146,10 @@ background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%);
 .player-date { font-size: 12px; color: rgba(255,255,255,0.4); }
 .unmute-overlay {
 position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
-z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px;
+z-index: 20; display: none; flex-direction: column; align-items: center; gap: 10px;
 pointer-events: none;
 }
-.unmute-overlay.visible { pointer-events: all; }
+.unmute-overlay.visible { display: flex; pointer-events: all; }
 .unmute-big-btn {
 background: rgba(0,0,0,0.75); border: 2px solid rgba(255,255,255,0.6);
 color: white; border-radius: 40px; padding: 14px 28px;

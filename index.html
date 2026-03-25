@@ -533,6 +533,7 @@ var playerIdx = 0;
 var touchStartY = 0;
 var dragging = false;
 var dragY = 0;
+var userUnmuted = false; // once user taps unmute, never show again this session
 
 function openPlayer(idx) {
   playerIdx = idx;
@@ -567,13 +568,14 @@ function loadPlayerVideo(idx) {
 function showEmbedPlayer(v) {
   // Try to play via embed — if blocked, show fallback
   var wrap = document.getElementById('playerThumb');
+  var muteParam = userUnmuted ? '0' : '1';
   var embedSrc = 'https://www.youtube.com/embed/' + v.videoId +
-    '?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=' +
+    '?autoplay=1&mute=' + muteParam + '&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=' +
     encodeURIComponent(window.location.origin);
 
-  // Show unmute overlay since iOS forces muted autoplay
+  // Only show unmute overlay if user hasn't unmuted yet this session
   var unmuteOverlay = document.getElementById('unmuteOverlay');
-  if (unmuteOverlay) unmuteOverlay.classList.add('visible');
+  if (unmuteOverlay && !userUnmuted) unmuteOverlay.classList.add('visible');
 
   wrap.innerHTML =
     '<iframe id="ytEmbed" src="' + embedSrc + '" ' +
@@ -640,15 +642,15 @@ function openInYouTube() {
 }
 
 function unmuteVideo() {
+  userUnmuted = true; // remember for all future videos this session
   // Reload iframe without mute — user gesture makes this work on iOS
   var vis = getVisible();
   var v = vis[playerIdx];
-  var wrap = document.getElementById('playerThumb');
   var embedSrc = 'https://www.youtube.com/embed/' + v.videoId +
     '?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1';
   var iframe = document.getElementById('ytEmbed');
   if (iframe) iframe.src = embedSrc;
-  // Hide unmute button
+  // Hide unmute button permanently
   var overlay = document.getElementById('unmuteOverlay');
   if (overlay) overlay.classList.remove('visible');
 }

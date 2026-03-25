@@ -202,7 +202,7 @@ white-space: nowrap; z-index: 300; transition: transform 0.25s; pointer-events: 
       </div>
     </div>
     <div class="add-bar">
-      <input id="channelInput" type="text" placeholder="Channel ID or @handle or name…" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input id="channelInput" type="text" placeholder="Paste UC code (UCxxxxxx…) or @handle" autocorrect="off" autocapitalize="off" spellcheck="false"/>
       <button class="add-btn" onclick="addChannel()">Add</button>
     </div>
   </div>
@@ -417,28 +417,40 @@ function refreshAll() { if (!channels.length) { toast('Add a channel first!'); r
 // ── ADD CHANNEL ───────────────────────────────────────────────────────────────
 async function addChannel() {
   var input = document.getElementById('channelInput');
-  var raw   = (input.value || '').trim();
+  var raw   = (input.value || '').trim().replace(/\s+/g, '');
   if (!raw) { input.focus(); return; }
 
-  input.value = ''; input.blur();
-  toast('Looking up channel…');
+  // Extract UC id from anywhere — handles full URLs, @handles, or raw UC codes
+  var ucMatch = raw.match(/UC[a-zA-Z0-9_-]{10,}/);
+  var id = ucMatch ? ucMatch[0] : null;
 
-  var id = null;
-  try {
-    id = await resolveChannelId(raw);
-  } catch(e) {
-    alert('Error looking up channel: ' + e.message);
-    return;
+  // If no UC id found, try API lookup
+  if (!id) {
+    toast('Looking up channel…');
+    try { id = await resolveChannelId(raw); } catch(e) { id = null; }
   }
 
   if (!id) {
-    alert('Could not find channel "' + raw + '". The API may be blocked or the handle is wrong. Try pasting the UC code directly.');
+    toast('Paste the UC code instead (starts with UC…)');
+    input.value = raw; // restore so they can try again
     return;
   }
-  if (channels.find(function(c){ return c.id === id; })) { toast('Already in your feed!'); return; }
 
-  var ch = { id: id, name: raw.replace(/^@/,'') };
-  channels.push(ch); saveChannels(channels); renderChips();
+  if (channels.find(function(c){ return c.id === id; })) {
+    toast('Already in your feed!');
+    input.value = '';
+    return;
+  }
+
+  input.value = '';
+  input.blur();
+
+  var ch = { id: id, name: raw.replace(/^@/,'').replace(/.*channel\//,'') };
+  channels.push(ch);
+  saveChannels(channels);
+  renderChips();
+  renderFeed();
+  toast('Loading videos…');
   await fetchAndAdd(ch);
 }
 

@@ -532,23 +532,74 @@ function loadPlayerVideo(idx) {
   document.getElementById('playerTitle').textContent   = v.title;
   document.getElementById('playerDate').textContent    = ago(v.pub) + '  ·  ' + v.durationFmt;
   document.getElementById('playerYtBtn').href          = v.link;
+  showEmbedPlayer(v);
+}
 
-  // Show thumbnail with big play button — tapping opens YouTube app
-  var hqThumb = 'https://img.youtube.com/vi/' + v.videoId + '/hqdefault.jpg';
-  document.getElementById('playerThumb').innerHTML =
-    '<img src="' + hqThumb + '" onerror="this.style.opacity=0">' +
-    '<div class="player-thumb-overlay">' +
-      '<button class="play-big-btn" onclick="openInYouTube()">' +
-        '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>' +
-      '</button>' +
-      '<div class="open-yt-label">Tap to watch</div>' +
+function showEmbedPlayer(v) {
+  // Try to play via embed — if blocked, show fallback
+  var wrap = document.getElementById('playerThumb');
+  var embedSrc = 'https://www.youtube.com/embed/' + v.videoId +
+    '?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=' +
+    encodeURIComponent(window.location.origin);
+
+  wrap.innerHTML =
+    '<iframe id="ytEmbed" src="' + embedSrc + '" ' +
+    'allow="autoplay; fullscreen; picture-in-picture" allowfullscreen ' +
+    'style="width:100%;height:100%;border:none;display:block;"></iframe>' +
+    '<div id="embedFallback" style="display:none;position:absolute;inset:0;">' +
+      '<img src="https://img.youtube.com/vi/' + v.videoId + '/hqdefault.jpg" style="width:100%;height:100%;object-fit:cover;">' +
+      '<div class="player-thumb-overlay">' +
+        '<button class="play-big-btn" onclick="openInYouTube()">' +
+          '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>' +
+        '</button>' +
+        '<div class="open-yt-label">Tap to open in YouTube</div>' +
+      '</div>' +
     '</div>';
+
+  // Detect if embed is blocked — YouTube sends postMessage when blocked
+  var checkTimer = setTimeout(function() {
+    // If after 4s no message received and iframe is loaded, assume it worked
+  }, 4000);
+
+  window.addEventListener('message', function onMsg(e) {
+    try {
+      var d = typeof e.data === 'string' ? JSON.parse(e.data) : e.data;
+      // YouTube sends info.videoData.errorCode when video is not embeddable
+      if (d && d.info && d.info.errorCode && d.info.errorCode !== 0) {
+        clearTimeout(checkTimer);
+        window.removeEventListener('message', onMsg);
+        showFallback();
+      }
+    } catch(err) {}
+  });
+
+  // Also check iframe load — if src ends up pointing to youtube.com/embed with error
+  var iframe = document.getElementById('ytEmbed');
+  if (iframe) {
+    iframe.addEventListener('load', function() {
+      // Short delay then check if "Watch on YouTube" is showing
+      setTimeout(function() {
+        try {
+          // Try posting to iframe to check state
+          iframe.contentWindow.postMessage('{"event":"listening"}', '*');
+        } catch(e) {
+          showFallback();
+        }
+      }, 2000);
+    });
+  }
+}
+
+function showFallback() {
+  var fb = document.getElementById('embedFallback');
+  var iframe = document.getElementById('ytEmbed');
+  if (fb) fb.style.display = 'block';
+  if (iframe) iframe.style.display = 'none';
 }
 
 function openInYouTube() {
   var vis = getVisible();
   var v = vis[playerIdx];
-  // Try YouTube app deep link first, fall back to web
   window.location.href = 'youtube://watch?v=' + v.videoId;
   setTimeout(function() {
     window.open('https://www.youtube.com/watch?v=' + v.videoId, '_blank');
@@ -580,15 +631,7 @@ function animateSlide(dir) {
   setTimeout(function() {
     slide.style.transition = 'none';
     slide.style.transform  = 'translateY(' + (dir==='up'?'100%':'-100%') + ')';
-    var hqThumb = 'https://img.youtube.com/vi/' + v.videoId + '/hqdefault.jpg';
-    document.getElementById('playerThumb').innerHTML =
-      '<img src="' + hqThumb + '" onerror="this.style.opacity=0">' +
-      '<div class="player-thumb-overlay">' +
-        '<button class="play-big-btn" onclick="openInYouTube()">' +
-          '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>' +
-        '</button>' +
-        '<div class="open-yt-label">Tap to watch</div>' +
-      '</div>';
+    showEmbedPlayer(v);
     requestAnimationFrame(function(){
       requestAnimationFrame(function(){
         slide.style.transition = 'transform 0.32s cubic-bezier(0.4,0,0.2,1)';

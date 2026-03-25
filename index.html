@@ -533,7 +533,7 @@ function loadPlayerVideo(idx) {
   // Show thumbnail with big play button — tapping opens YouTube app
   var hqThumb = 'https://img.youtube.com/vi/' + v.videoId + '/hqdefault.jpg';
   document.getElementById('playerThumb').innerHTML =
-    '<img src="' + hqThumb + '" onerror="this.src='' + v.thumb + ''">' +
+    '<img src="' + hqThumb + '" onerror="this.style.opacity=0">' +
     '<div class="player-thumb-overlay">' +
       '<button class="play-big-btn" onclick="openInYouTube()">' +
         '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>' +
@@ -579,7 +579,7 @@ function animateSlide(dir) {
     slide.style.transform  = 'translateY(' + (dir==='up'?'100%':'-100%') + ')';
     var hqThumb = 'https://img.youtube.com/vi/' + v.videoId + '/hqdefault.jpg';
     document.getElementById('playerThumb').innerHTML =
-      '<img src="' + hqThumb + '" onerror="this.src='' + v.thumb + ''">' +
+      '<img src="' + hqThumb + '" onerror="this.style.opacity=0">' +
       '<div class="player-thumb-overlay">' +
         '<button class="play-big-btn" onclick="openInYouTube()">' +
           '<svg width="28" height="28" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>' +

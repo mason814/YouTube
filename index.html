@@ -144,6 +144,27 @@ background: linear-gradient(to top, rgba(0,0,0,0.95) 0%, transparent 100%);
 .player-channel { font-size: 13px; color: rgba(255,255,255,0.6); margin-bottom: 6px; }
 .player-title { font-size: 17px; font-weight: 600; line-height: 1.35; color: white; margin-bottom: 8px; }
 .player-date { font-size: 12px; color: rgba(255,255,255,0.4); }
+.unmute-overlay {
+position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+z-index: 20; display: flex; flex-direction: column; align-items: center; gap: 10px;
+pointer-events: none;
+}
+.unmute-overlay.visible { pointer-events: all; }
+.unmute-big-btn {
+background: rgba(0,0,0,0.75); border: 2px solid rgba(255,255,255,0.6);
+color: white; border-radius: 40px; padding: 14px 28px;
+font-size: 16px; font-weight: 700; font-family: ‘Syne’, sans-serif;
+display: flex; align-items: center; gap: 10px; cursor: pointer;
+backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+transition: transform 0.15s, opacity 0.15s;
+animation: pulseFade 2s ease infinite;
+}
+.unmute-big-btn:active { transform: scale(0.95); }
+@keyframes pulseFade {
+0%,100% { opacity:1; transform: scale(1); }
+50% { opacity:0.75; transform: scale(0.97); }
+}
+
 .swipe-hint {
 position: absolute; bottom: calc(var(–safe-bottom) + 16px); left: 50%; transform: translateX(-50%);
 display: flex; flex-direction: column; align-items: center; gap: 4px; opacity: 0.5; pointer-events: none;
@@ -238,6 +259,12 @@ white-space: nowrap; z-index: 300; transition: transform 0.25s; pointer-events: 
       <div class="player-date" id="playerDate"></div>
     </div>
   </div>
+  <div class="unmute-overlay" id="unmuteOverlay">
+    <button class="unmute-big-btn" onclick="unmuteVideo()">
+      🔇 Tap to Unmute
+    </button>
+  </div>
+
   <div class="swipe-hint" id="swipeHint">
     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M12 19V5M5 12l7-7 7 7"/></svg>
     <span>SWIPE UP FOR NEXT</span>
@@ -521,6 +548,8 @@ function closePlayer() {
   document.getElementById('playerWrap').classList.remove('open');
   document.body.style.overflow = '';
   document.getElementById('playerThumb').innerHTML = '';
+  var overlay = document.getElementById('unmuteOverlay');
+  if (overlay) overlay.classList.remove('visible');
 }
 
 function loadPlayerVideo(idx) {
@@ -541,6 +570,10 @@ function showEmbedPlayer(v) {
   var embedSrc = 'https://www.youtube.com/embed/' + v.videoId +
     '?autoplay=1&mute=1&playsinline=1&rel=0&modestbranding=1&enablejsapi=1&origin=' +
     encodeURIComponent(window.location.origin);
+
+  // Show unmute overlay since iOS forces muted autoplay
+  var unmuteOverlay = document.getElementById('unmuteOverlay');
+  if (unmuteOverlay) unmuteOverlay.classList.add('visible');
 
   wrap.innerHTML =
     '<iframe id="ytEmbed" src="' + embedSrc + '" ' +
@@ -606,6 +639,20 @@ function openInYouTube() {
   }, 500);
 }
 
+function unmuteVideo() {
+  // Reload iframe without mute — user gesture makes this work on iOS
+  var vis = getVisible();
+  var v = vis[playerIdx];
+  var wrap = document.getElementById('playerThumb');
+  var embedSrc = 'https://www.youtube.com/embed/' + v.videoId +
+    '?autoplay=1&mute=0&playsinline=1&rel=0&modestbranding=1';
+  var iframe = document.getElementById('ytEmbed');
+  if (iframe) iframe.src = embedSrc;
+  // Hide unmute button
+  var overlay = document.getElementById('unmuteOverlay');
+  if (overlay) overlay.classList.remove('visible');
+}
+
 function playerNext() {
   var vis = getVisible();
   if (playerIdx < vis.length - 1) { playerIdx++; animateSlide('up'); }
@@ -616,6 +663,8 @@ function playerPrev() {
   else toast('First video!');
 }
 function animateSlide(dir) {
+  var overlay = document.getElementById('unmuteOverlay');
+  if (overlay) overlay.classList.remove('visible');
   var slide = document.getElementById('playerSlide');
   var vis = getVisible();
   var v = vis[playerIdx];
